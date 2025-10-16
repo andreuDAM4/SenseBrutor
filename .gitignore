@@ -1,0 +1,29 @@
+# Fitxers de compilació i carpetes temporals
+/target/
+/bin/
+/out/
+
+# Fitxers de NetBeans i configuració local
+/nbproject/private/
+/*.iml
+/.idea/
+/*.class
+.settings/
+
+# Logs i temporals
+*.log
+*.tmp
+*.swp
+*.DS_Store
+
+# Fitxers generats
+*.jar
+*.war
+*.ear
+
+
+# FFmpeg, yt-dlp, vídeos descarregats
+*.exe
+*.mp4
+*.mkv
+*.mp3
