@@ -1,7 +1,4 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
- */
+
 package anglada.sensebrutor;
 
 /**
@@ -11,18 +8,33 @@ package anglada.sensebrutor;
 public class SenseBrutor extends javax.swing.JFrame {
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(SenseBrutor.class.getName());
-
+    private DownloadPanel downloadpanel;
+    private PreferencesPanel preferencesPanel;
     /**
      * Creates new form SenseBrutor
      */
+    
     public SenseBrutor() {
         initComponents();
-        setSize(800,600);
+        setSize(600, 400);
         setLocationRelativeTo(null);
-        
-        
-    }
 
+        downloadpanel = new DownloadPanel(this); // panel principal
+        preferencesPanel = new PreferencesPanel(this); // panel de configuración
+        downloadpanel.setBounds(0, 0, 600, 400);
+        preferencesPanel.setBounds(0, 0, 600, 400);
+        // Mostramos primero el panel principal
+        getContentPane().add(downloadpanel);
+        getContentPane().add(preferencesPanel);
+        preferencesPanel.setVisible(false);
+    }
+    public void mostrarDownloadPanel() {
+        preferencesPanel.setVisible(false);
+        downloadpanel.setVisible(true);
+    }
+    public PreferencesPanel getPreferencesPanel() {
+        return preferencesPanel;
+    }
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -59,6 +71,11 @@ public class SenseBrutor extends javax.swing.JFrame {
         jMenuEdit.setText("Editar");
 
         jMenuItemPreferences.setText("Configuración");
+        jMenuItemPreferences.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItemPreferencesActionPerformed(evt);
+            }
+        });
         jMenuEdit.add(jMenuItemPreferences);
 
         jMenuBar1.add(jMenuEdit);
@@ -78,6 +95,12 @@ public class SenseBrutor extends javax.swing.JFrame {
     private void jMenuItemExitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemExitActionPerformed
         System.exit(0);
     }//GEN-LAST:event_jMenuItemExitActionPerformed
+
+    private void jMenuItemPreferencesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemPreferencesActionPerformed
+        downloadpanel.setVisible(false);
+        preferencesPanel.setVisible(true);
+        
+    }//GEN-LAST:event_jMenuItemPreferencesActionPerformed
 
     /**
      * @param args the command line arguments

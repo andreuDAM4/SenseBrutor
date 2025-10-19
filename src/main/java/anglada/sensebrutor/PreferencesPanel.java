@@ -1,26 +1,39 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
- */
 package anglada.sensebrutor;
+
+import java.io.File;
+import javax.swing.JFileChooser;
 
 /**
  *
  * @author Andreu
  */
-public class PreferencesPanel extends javax.swing.JFrame {
-    
-    private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(PreferencesPanel.class.getName());
+public class PreferencesPanel extends javax.swing.JPanel {
 
     /**
      * Creates new form PreferencesPanel
      */
-    public PreferencesPanel() {
+    private SenseBrutor mainFrame;
+    public PreferencesPanel(SenseBrutor mainFrame) {
         initComponents();
-        setSize(800,600);
-        setLocationRelativeTo(null);
+        this.mainFrame = mainFrame; 
+    }
+    
+    //Serie de funcions necessaries per la descarrega
+    public String getDownloadPath() {
+        return jTextFieldDownloadPath.getText().trim();
     }
 
+    public String getYTDLPPath() {
+        return jTextFieldPathYTDLP.getText().trim();
+    }
+
+    public int getMaxVelocity() {
+        return (Integer) jSpinnerVelocity.getValue();
+    }
+
+    public boolean isCreateM3U() {
+        return jCheckBoxM3u.isSelected();
+    }
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -30,99 +43,115 @@ public class PreferencesPanel extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jButtonPathTemporaryFiles = new javax.swing.JButton();
-        jTextFieldPathTemporaryFiles = new javax.swing.JTextField();
-        jLabelPathTemporaryFiles = new javax.swing.JLabel();
-        jCheckBoxCreateM3U = new javax.swing.JCheckBox();
+        jFileChooserGeneral = new javax.swing.JFileChooser();
+        jLabelDownloadPathFile = new javax.swing.JLabel();
+        jButtonDownloadPath = new javax.swing.JButton();
+        jTextFieldDownloadPath = new javax.swing.JTextField();
+        jCheckBoxM3u = new javax.swing.JCheckBox();
         jLabelVelocity = new javax.swing.JLabel();
-        jSpinnerDownloadSpeed = new javax.swing.JSpinner();
+        jSpinnerVelocity = new javax.swing.JSpinner();
         jLabelPathYTDLP = new javax.swing.JLabel();
-        jTextFieldPathYTDLP = new javax.swing.JTextField();
         jButtonPathYTDLP = new javax.swing.JButton();
+        jTextFieldPathYTDLP = new javax.swing.JTextField();
+        jButton1 = new javax.swing.JButton();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        getContentPane().setLayout(null);
+        jFileChooserGeneral.setApproveButtonText("Seleccionar");
+        jFileChooserGeneral.setDialogTitle("Selecciona una carpeta para guardar");
+        jFileChooserGeneral.setFileSelectionMode(javax.swing.JFileChooser.DIRECTORIES_ONLY);
 
-        jButtonPathTemporaryFiles.setText("Seleccionar Carpeta");
-        getContentPane().add(jButtonPathTemporaryFiles);
-        jButtonPathTemporaryFiles.setBounds(40, 60, 134, 23);
+        setLayout(null);
 
-        jTextFieldPathTemporaryFiles.setEditable(false);
-        jTextFieldPathTemporaryFiles.addActionListener(new java.awt.event.ActionListener() {
+        jLabelDownloadPathFile.setText("Guardar archivo en");
+        add(jLabelDownloadPathFile);
+        jLabelDownloadPathFile.setBounds(48, 32, 190, 16);
+
+        jButtonDownloadPath.setText("Seleccionar Carpeta");
+        jButtonDownloadPath.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jTextFieldPathTemporaryFilesActionPerformed(evt);
+                jButtonDownloadPathActionPerformed(evt);
             }
         });
-        getContentPane().add(jTextFieldPathTemporaryFiles);
-        jTextFieldPathTemporaryFiles.setBounds(180, 60, 260, 22);
+        add(jButtonDownloadPath);
+        jButtonDownloadPath.setBounds(40, 60, 160, 23);
+        add(jTextFieldDownloadPath);
+        jTextFieldDownloadPath.setBounds(210, 60, 281, 22);
 
-        jLabelPathTemporaryFiles.setText("Ruta para archivos temporales");
-        getContentPane().add(jLabelPathTemporaryFiles);
-        jLabelPathTemporaryFiles.setBounds(40, 30, 160, 16);
-
-        jCheckBoxCreateM3U.setText("Crear archivo .m3u");
-        getContentPane().add(jCheckBoxCreateM3U);
-        jCheckBoxCreateM3U.setBounds(40, 100, 150, 20);
+        jCheckBoxM3u.setText("Crear archivo .m3u");
+        add(jCheckBoxM3u);
+        jCheckBoxM3u.setBounds(48, 107, 170, 20);
 
         jLabelVelocity.setText("Velocidad máxima (KB/s)");
-        getContentPane().add(jLabelVelocity);
-        jLabelVelocity.setBounds(40, 140, 170, 16);
-        getContentPane().add(jSpinnerDownloadSpeed);
-        jSpinnerDownloadSpeed.setBounds(40, 170, 64, 22);
+        add(jLabelVelocity);
+        jLabelVelocity.setBounds(48, 139, 200, 16);
+        add(jSpinnerVelocity);
+        jSpinnerVelocity.setBounds(48, 173, 64, 22);
 
         jLabelPathYTDLP.setText("Ruta YT-DLP");
-        getContentPane().add(jLabelPathYTDLP);
-        jLabelPathYTDLP.setBounds(40, 210, 80, 16);
-
-        jTextFieldPathYTDLP.setEditable(false);
-        getContentPane().add(jTextFieldPathYTDLP);
-        jTextFieldPathYTDLP.setBounds(190, 240, 240, 22);
+        add(jLabelPathYTDLP);
+        jLabelPathYTDLP.setBounds(48, 213, 130, 16);
 
         jButtonPathYTDLP.setText("Seleccionar archivo");
-        getContentPane().add(jButtonPathYTDLP);
-        jButtonPathYTDLP.setBounds(40, 240, 140, 23);
-
-        pack();
-    }// </editor-fold>//GEN-END:initComponents
-
-    private void jTextFieldPathTemporaryFilesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextFieldPathTemporaryFilesActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jTextFieldPathTemporaryFilesActionPerformed
-
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
+        jButtonPathYTDLP.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonPathYTDLPActionPerformed(evt);
             }
-        } catch (ReflectiveOperationException | javax.swing.UnsupportedLookAndFeelException ex) {
-            logger.log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
+        });
+        add(jButtonPathYTDLP);
+        jButtonPathYTDLP.setBounds(40, 240, 160, 23);
+        add(jTextFieldPathYTDLP);
+        jTextFieldPathYTDLP.setBounds(220, 240, 277, 22);
 
-        /* Create and display the form */
-        java.awt.EventQueue.invokeLater(() -> new PreferencesPanel().setVisible(true));
-    }
+        jButton1.setText("!DESCARGAR YA!");
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
+        add(jButton1);
+        jButton1.setBounds(140, 290, 260, 23);
+    }// </editor-fold>//GEN-END:initComponents
+    
+    //FileChooser que permet navegar i seleccionar una ruta directori
+    private void jButtonDownloadPathActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDownloadPathActionPerformed
+        jFileChooserGeneral.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        int result = jFileChooserGeneral.showOpenDialog(this);
+        
+        if (result == JFileChooser.APPROVE_OPTION) {
+            File carpeta = jFileChooserGeneral.getSelectedFile();
+            String ruta = carpeta.getAbsolutePath();
+            // Guarda la ruta en una variable o textfield
+            jTextFieldDownloadPath.setText(ruta);
+        }
+    }//GEN-LAST:event_jButtonDownloadPathActionPerformed
+    
+    //FileChooser que permet navegar i seleccionar una ruta arxiu
+    private void jButtonPathYTDLPActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonPathYTDLPActionPerformed
+        jFileChooserGeneral.setDialogTitle("Selecciona el archivo de yt-dlp");
+        jFileChooserGeneral.setFileSelectionMode(JFileChooser.FILES_ONLY); // 👈 Solo archivos
+
+        int result = jFileChooserGeneral.showOpenDialog(this);
+        if (result == JFileChooser.APPROVE_OPTION) {
+            File archivo = jFileChooserGeneral.getSelectedFile();
+            jTextFieldPathYTDLP.setText(archivo.getAbsolutePath());
+        }
+    }//GEN-LAST:event_jButtonPathYTDLPActionPerformed
+
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        mainFrame.mostrarDownloadPanel();
+    }//GEN-LAST:event_jButton1ActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButtonPathTemporaryFiles;
+    private javax.swing.JButton jButton1;
+    private javax.swing.JButton jButtonDownloadPath;
     private javax.swing.JButton jButtonPathYTDLP;
-    private javax.swing.JCheckBox jCheckBoxCreateM3U;
-    private javax.swing.JLabel jLabelPathTemporaryFiles;
+    private javax.swing.JCheckBox jCheckBoxM3u;
+    private javax.swing.JFileChooser jFileChooserGeneral;
+    private javax.swing.JLabel jLabelDownloadPathFile;
     private javax.swing.JLabel jLabelPathYTDLP;
     private javax.swing.JLabel jLabelVelocity;
-    private javax.swing.JSpinner jSpinnerDownloadSpeed;
-    private javax.swing.JTextField jTextFieldPathTemporaryFiles;
+    private javax.swing.JSpinner jSpinnerVelocity;
+    private javax.swing.JTextField jTextFieldDownloadPath;
     private javax.swing.JTextField jTextFieldPathYTDLP;
     // End of variables declaration//GEN-END:variables
 }
