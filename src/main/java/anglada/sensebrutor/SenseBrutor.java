@@ -32,11 +32,52 @@ public class SenseBrutor extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        jMenuBar1 = new javax.swing.JMenuBar();
+        jMenuFile = new javax.swing.JMenu();
+        jMenuItemExit = new javax.swing.JMenuItem();
+        jMenuEdit = new javax.swing.JMenu();
+        jMenuItemPreferences = new javax.swing.JMenuItem();
+        JMenuHelp = new javax.swing.JMenu();
+        jMenuItemAbout = new javax.swing.JMenuItem();
+
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setResizable(false);
         getContentPane().setLayout(null);
+
+        jMenuFile.setText("Archivo");
+
+        jMenuItemExit.setText("Salir");
+        jMenuItemExit.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItemExitActionPerformed(evt);
+            }
+        });
+        jMenuFile.add(jMenuItemExit);
+
+        jMenuBar1.add(jMenuFile);
+
+        jMenuEdit.setText("Editar");
+
+        jMenuItemPreferences.setText("Configuración");
+        jMenuEdit.add(jMenuItemPreferences);
+
+        jMenuBar1.add(jMenuEdit);
+
+        JMenuHelp.setText("Ayuda");
+
+        jMenuItemAbout.setText("Acerca de...");
+        JMenuHelp.add(jMenuItemAbout);
+
+        jMenuBar1.add(JMenuHelp);
+
+        setJMenuBar(jMenuBar1);
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void jMenuItemExitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemExitActionPerformed
+        System.exit(0);
+    }//GEN-LAST:event_jMenuItemExitActionPerformed
 
     /**
      * @param args the command line arguments
@@ -64,5 +105,12 @@ public class SenseBrutor extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JMenu JMenuHelp;
+    private javax.swing.JMenuBar jMenuBar1;
+    private javax.swing.JMenu jMenuEdit;
+    private javax.swing.JMenu jMenuFile;
+    private javax.swing.JMenuItem jMenuItemAbout;
+    private javax.swing.JMenuItem jMenuItemExit;
+    private javax.swing.JMenuItem jMenuItemPreferences;
     // End of variables declaration//GEN-END:variables
 }
