@@ -26,25 +26,25 @@ La descàrrega només és possible si al panell de configuració s'ha fet el seg
 
 ##Finalització de la descàrrega
 
-Un cop completada la descàrrega, es farà visible un botó que permet reproduir l'arxiu acabat de descarregar directament des de l'aplicació.
+-Un cop completada la descàrrega, es farà visible un botó que permet reproduir l'arxiu acabat de descarregar directament des de l'aplicació.
 
 ##Funcionalitats extra
-He agregat la funcionalitat de poder elegir el format de sortida segons el que la URL pugui oferir.
+-He agregat la funcionalitat de poder elegir el format de sortida segons el que la URL pugui oferir.
 
-He agregat un progressbar que surt a l'hora de carregar els formats i a l'hora de iniciar la descarrega.
+-He agregat un progressbar que surt a l'hora de carregar els formats i a l'hora de iniciar la descarrega.
 
-He agregat validacions per si s'intenta descargar sense tenir definit una ruta de sortida o si no tenim guardat l'arxiu ytdlp.exe
+-He agregat validacions per si s'intenta descargar sense tenir definit una ruta de sortida o si no tenim guardat l'arxiu ytdlp.exe
 
 ##Probelmes
-No sabia molt be com fer per carregar els formats, m'ha duit bastant de temps pero finalment ho he deixat com el principi. Una vegada es surt de posar
+-No sabia molt be com fer per carregar els formats, m'ha duit bastant de temps pero finalment ho he deixat com el principi. Una vegada es surt de posar
 la URL s'inicia la carrega de formats.
 
-Probelmes en caracters extranys o accents una vegada descarregat l'arxiu per reproduirlo.
+-Probelmes en caracters extranys o accents una vegada descarregat l'arxiu per reproduirlo.
 
 ##Recursos
-https://www.youtube.com/@spdvi7370
+-https://www.youtube.com/@spdvi7370
 
-https://chatgpt.com/
+-https://chatgpt.com/
 
-https://paucasesnovescifp.cat/
+-https://paucasesnovescifp.cat/
 
