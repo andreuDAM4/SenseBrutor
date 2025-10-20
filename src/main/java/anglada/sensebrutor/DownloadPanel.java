@@ -1,12 +1,9 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JPanel.java to edit this template
- */
 package anglada.sensebrutor;
 
 import java.awt.Desktop;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import javax.swing.JOptionPane;
@@ -31,6 +28,7 @@ public class DownloadPanel extends javax.swing.JPanel {
         jButtonDownload.setEnabled(false);
         jProgressBarDownload.setVisible(false);
         jLabelLoadFormat.setVisible(false);
+        
     }
 
     /**
@@ -55,9 +53,10 @@ public class DownloadPanel extends javax.swing.JPanel {
 
         setLayout(null);
 
+        jLabelTittle.setFont(new java.awt.Font("Consolas", 1, 24)); // NOI18N
         jLabelTittle.setText("SenseBrutor");
         add(jLabelTittle);
-        jLabelTittle.setBounds(250, 20, 70, 16);
+        jLabelTittle.setBounds(200, 10, 170, 29);
 
         jLabelURL.setText("URL:");
         add(jLabelURL);
@@ -81,7 +80,7 @@ public class DownloadPanel extends javax.swing.JPanel {
             }
         });
         add(jComboBoxFormat);
-        jComboBoxFormat.setBounds(120, 90, 170, 30);
+        jComboBoxFormat.setBounds(120, 90, 340, 30);
 
         jButtonDownload.setText("Descargar");
         jButtonDownload.addActionListener(new java.awt.event.ActionListener() {
@@ -90,7 +89,7 @@ public class DownloadPanel extends javax.swing.JPanel {
             }
         });
         add(jButtonDownload);
-        jButtonDownload.setBounds(210, 130, 150, 23);
+        jButtonDownload.setBounds(200, 130, 150, 23);
         add(jProgressBarDownload);
         jProgressBarDownload.setBounds(130, 180, 300, 30);
         add(jLabelProgress);
@@ -103,11 +102,11 @@ public class DownloadPanel extends javax.swing.JPanel {
             }
         });
         add(jButtonPlay);
-        jButtonPlay.setBounds(220, 240, 120, 23);
+        jButtonPlay.setBounds(210, 220, 120, 23);
 
         jLabelLoadFormat.setText("Cargando formatos...");
         add(jLabelLoadFormat);
-        jLabelLoadFormat.setBounds(200, 160, 140, 16);
+        jLabelLoadFormat.setBounds(230, 160, 140, 16);
     }// </editor-fold>//GEN-END:initComponents
     
     // Método simple per extreure el porcentge de descarrega la línea de yt-dlp per despres posar dins el progress bar
@@ -115,41 +114,21 @@ public class DownloadPanel extends javax.swing.JPanel {
         try {
             line = line.trim();
             if (line.startsWith("[download]") && line.contains("%")) {
-                // Ejemplo de línea: "[download]  40.0% of  322.51MiB at  500.39KiB/s ETA 10:59"
                 int idx = line.indexOf("%");
                 String perc = line.substring(0, idx).replace("[download]", "").trim(); // "40.0"
-                float f = Float.parseFloat(perc); // 40.0
-                return Math.round(f); // redondear a entero
+                float f = Float.parseFloat(perc); 
+                return Math.round(f); 
             }
         } catch (Exception e) {
-            // ignorar errores de parse
+            System.out.println("Error al sacar el % del progressbar");
         }
         return null;
     }
     
     /*Accio del boto descarregar, inclou progresbar i quan troba " " una vegada a finalitzat asigna la variable downloadedFilePath.
     downloadedFilePath serveix per una vegada descarregat obrir l'arxiu al reproductor predeterminat*/
-    private void jButtonDownloadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDownloadActionPerformed
+    private void iniciarDescarga(String ytdlpPath, String url, String formatCode, String downloadPath, int maxVelocity) {
         jProgressBarDownload.setVisible(true);
-        PreferencesPanel prefs = mainFrame.getPreferencesPanel();
-
-        String downloadPath = prefs.getDownloadPath();
-        String ytdlpPath = prefs.getYTDLPPath();
-        String selectedItem = (String) jComboBoxFormat.getSelectedItem();
-        final String formatCode;
-        if (selectedItem != null) {
-            formatCode = selectedItem.split("\\s+")[0];
-        } else {
-            formatCode = "best";
-        }
-        int maxVelocity = prefs.getMaxVelocity();
-
-        String url = jTextFieldURL.getText().trim();
-        if (url.isEmpty()) {
-            System.out.println("URL vacía");
-            return;
-        }
-
         jProgressBarDownload.setValue(0);
         jLabelProgress.setText("0%");
 
@@ -163,36 +142,50 @@ public class DownloadPanel extends javax.swing.JPanel {
                         "-o", downloadPath + File.separator + "%(title)s.%(ext)s",
                         url
                 );
+                
+                //Velocitat máxima
                 if (maxVelocity > 0) {
                     pb.command().add("--limit-rate");
                     pb.command().add(maxVelocity + "K");
                 }
-                pb.redirectErrorStream(true);
 
+                pb.redirectErrorStream(true);
                 Process process = pb.start();
                 BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
                 String line;
                 String lastLineWithQuotes = null;
+                Boolean fixedUp = false;
                 while ((line = reader.readLine()) != null) {
                     System.out.println(line);
                     Integer percent = parsePercentage(line);
-                    if (percent != null) {
-                        publish(percent);
-                    }
+                    if (percent != null) publish(percent);
 
+                    // Guardar la última línea que te comilles
                     if (line.contains("\"")) {
                         lastLineWithQuotes = line;
                     }
+                    
+                    //En cas de seleccionar M3U guardam ruta
+                    if (line.startsWith("[FixupM3u8]")){
+                        int idx = line.indexOf("\"");
+                        int lastIdx = line.lastIndexOf("\"");
+                        if (idx >= 0 && lastIdx > idx) {
+                            downloadedFilePath = line.substring(idx + 1, lastIdx);
+                            fixedUp = true;
+                        }
+                    }
                 }
-                if (lastLineWithQuotes != null) {
+                
+                if (lastLineWithQuotes != null && fixedUp == false) {
                     int idx = lastLineWithQuotes.indexOf("\"");
                     int lastIdx = lastLineWithQuotes.lastIndexOf("\"");
                     if (idx >= 0 && lastIdx > idx) {
                         downloadedFilePath = lastLineWithQuotes.substring(idx + 1, lastIdx);
                     }
                 }
+
                 process.waitFor();
-                publish(100); // asegurar 100% al final
+                publish(100); // asegurar 100%
                 return null;
             }
 
@@ -202,10 +195,29 @@ public class DownloadPanel extends javax.swing.JPanel {
                 jProgressBarDownload.setValue(last);
                 jLabelProgress.setText(last + "%");
             }
+
             @Override
             protected void done() {
                 if (downloadedFilePath != null && new File(downloadedFilePath).exists()) {
                     jButtonPlay.setVisible(true);
+                
+                    PreferencesPanel prefs = mainFrame.getPreferencesPanel();
+                    if (prefs.isCreateM3U()) {
+                        try {
+                            File downloadedFile = new File(downloadedFilePath);
+                            File folder = downloadedFile.getParentFile();
+                            File m3uFile = new File(folder, "playlist.m3u");
+
+                            // Añadir el archivo descargado a la lista (modo append = true)
+                            try (FileWriter fw = new FileWriter(m3uFile, true)) {
+                                fw.write(downloadedFile.getAbsolutePath() + "\n");
+                            }
+
+                            System.out.println("Archivo M3U actualizado: " + m3uFile.getAbsolutePath());
+                        } catch (IOException ex) {
+                            System.err.println("Error al crear archivo M3U: " + ex.getMessage());
+                        }
+                    }
                 } else {
                     System.out.println("Archivo final no encontrado: " + downloadedFilePath);
                 }
@@ -213,6 +225,36 @@ public class DownloadPanel extends javax.swing.JPanel {
         };
 
         worker.execute();
+    }
+    
+    private void jButtonDownloadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDownloadActionPerformed
+        PreferencesPanel prefs = mainFrame.getPreferencesPanel();
+
+        String downloadPath = prefs.getDownloadPath();
+        if (downloadPath.isEmpty()) {
+            JOptionPane.showMessageDialog(
+                this,
+                "No se ha configurado una carpeta de destino.\nSelecciona una para guardar las descargas.",
+                "Seleccionar carpeta de descarga",
+                JOptionPane.INFORMATION_MESSAGE
+            );
+            prefs.elegirCarpetaDescarga();
+            downloadPath = prefs.getDownloadPath();
+            if (downloadPath.isEmpty()) return;
+        }
+        jLabelProgress.setVisible(true);
+        String ytdlpPath = prefs.getYTDLPPath();
+        String selectedItem = (String) jComboBoxFormat.getSelectedItem();
+        String formatCode = (selectedItem != null) ? selectedItem.split("\\s+")[0] : "best";
+        int maxVelocity = prefs.getMaxVelocity();
+        String url = jTextFieldURL.getText().trim();
+
+        if (url.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Por favor, introduce una URL válida.");
+            return;
+        }
+
+        iniciarDescarga(ytdlpPath, url, formatCode, downloadPath, maxVelocity);
     
     }//GEN-LAST:event_jButtonDownloadActionPerformed
     
@@ -229,9 +271,24 @@ public class DownloadPanel extends javax.swing.JPanel {
     
     //Carrega els formats disponibles de la URL
     private void loadFormats() {
+        
         PreferencesPanel prefs = mainFrame.getPreferencesPanel();
+        String ytdlpPath = prefs.getYTDLPPath();
         String url = jTextFieldURL.getText().trim();
-        if (url.isEmpty()) return;
+        if (url.isEmpty())
+            return;
+        else {
+            if (ytdlpPath == null || ytdlpPath.isEmpty()) {
+                JOptionPane.showMessageDialog(
+                    this,
+                    "No se ha configurado la ruta del ejecutable de yt-dlp.\nPor favor, selecciona el archivo.",
+                    "Ruta de yt-dlp requerida",
+                    JOptionPane.INFORMATION_MESSAGE
+                );
+                prefs.elegirArchivoYTDLP();
+            }
+        }
+        
         // mostrar progress bar
         jProgressBarDownload.setIndeterminate(true);
         jProgressBarDownload.setVisible(true);
@@ -240,7 +297,7 @@ public class DownloadPanel extends javax.swing.JPanel {
             @Override
             protected Void doInBackground() throws Exception {
                 ProcessBuilder pb = new ProcessBuilder(
-                    prefs.getYTDLPPath(), // ruta a yt-dlp
+                    prefs.getYTDLPPath(), 
                     "-F",
                     url
                 );
@@ -249,9 +306,9 @@ public class DownloadPanel extends javax.swing.JPanel {
                 BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
                 String line;
                 while ((line = reader.readLine()) != null) {
-                    // parsea solo líneas de formatos válidos
+                    
                     if (line.matches("\\d+.*")) {
-                        publish(line); // envía al método process()
+                        publish(line); 
                     }
                 }
                 process.waitFor();
@@ -262,12 +319,12 @@ public class DownloadPanel extends javax.swing.JPanel {
             protected void process(java.util.List<String> chunks) {
                 jComboBoxFormat.removeAllItems();
                 for (String formatLine : chunks) {
-                    // quitar el código inicial y dejar solo la descripción
-                    String[] parts = formatLine.split("\\s+", 2); // separa en 2 partes: código y resto
+                    // LLevar el codi inicial i dexiar descripcio del format
+                    String[] parts = formatLine.split("\\s+", 2); // separa en 2 parts: codi y resto
                     if (parts.length > 1) {
-                        jComboBoxFormat.addItem(parts[1]); // solo la descripción
+                        jComboBoxFormat.addItem(parts[1]); 
                     } else {
-                        jComboBoxFormat.addItem(parts[0]); // fallback si algo raro
+                        jComboBoxFormat.addItem(parts[0]); 
                     }
                 }
             }
@@ -281,19 +338,24 @@ public class DownloadPanel extends javax.swing.JPanel {
         worker.execute();
     }
     
-    //Despres d'aferrar la URL carrega els formats
-    private void jTextFieldURLFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_jTextFieldURLFocusLost
-        loadFormats();
-    }//GEN-LAST:event_jTextFieldURLFocusLost
-    
+   
     //Fa disponible el boto de descarregar una vegada s'ha seleccionat un format
     private void jComboBoxFormatActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBoxFormatActionPerformed
+        //Los pongo invisibles por si se vuelva a elegir otra url
+        
         if (jComboBoxFormat.getSelectedItem() != null) {
             jButtonDownload.setEnabled(true);
         } else {
             jButtonDownload.setEnabled(false);
         }
     }//GEN-LAST:event_jComboBoxFormatActionPerformed
+
+    private void jTextFieldURLFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_jTextFieldURLFocusLost
+        jLabelProgress.setVisible(false);
+        jButtonPlay.setVisible(false);
+        loadFormats();
+        
+    }//GEN-LAST:event_jTextFieldURLFocusLost
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

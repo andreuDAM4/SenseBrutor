@@ -18,7 +18,7 @@ public class PreferencesPanel extends javax.swing.JPanel {
         this.mainFrame = mainFrame; 
     }
     
-    //Serie de funcions necessaries per la descarrega
+    /*Serie de funcions necessaries per la descarrega*/
     public String getDownloadPath() {
         return jTextFieldDownloadPath.getText().trim();
     }
@@ -33,6 +33,16 @@ public class PreferencesPanel extends javax.swing.JPanel {
 
     public boolean isCreateM3U() {
         return jCheckBoxM3u.isSelected();
+    }
+    
+    //Funcio necessaria a l'hora d'apretar descargar sense tenir definit ruta sortida
+    public void elegirCarpetaDescarga() {
+        jButtonDownloadPathActionPerformed(null);
+    }
+    
+    //Funcio necessaria a l'hora d'agregar formats
+    public void elegirArchivoYTDLP() {
+        jButtonPathYTDLPActionPerformed(null);
     }
     /**
      * This method is called from within the constructor to initialize the form.
@@ -63,7 +73,7 @@ public class PreferencesPanel extends javax.swing.JPanel {
 
         jLabelDownloadPathFile.setText("Guardar archivo en");
         add(jLabelDownloadPathFile);
-        jLabelDownloadPathFile.setBounds(48, 32, 190, 16);
+        jLabelDownloadPathFile.setBounds(50, 10, 190, 16);
 
         jButtonDownloadPath.setText("Seleccionar Carpeta");
         jButtonDownloadPath.addActionListener(new java.awt.event.ActionListener() {
@@ -72,23 +82,23 @@ public class PreferencesPanel extends javax.swing.JPanel {
             }
         });
         add(jButtonDownloadPath);
-        jButtonDownloadPath.setBounds(40, 60, 160, 23);
+        jButtonDownloadPath.setBounds(50, 30, 160, 23);
         add(jTextFieldDownloadPath);
-        jTextFieldDownloadPath.setBounds(210, 60, 281, 22);
+        jTextFieldDownloadPath.setBounds(220, 30, 281, 22);
 
         jCheckBoxM3u.setText("Crear archivo .m3u");
         add(jCheckBoxM3u);
-        jCheckBoxM3u.setBounds(48, 107, 170, 20);
+        jCheckBoxM3u.setBounds(50, 70, 170, 20);
 
         jLabelVelocity.setText("Velocidad máxima (KB/s)");
         add(jLabelVelocity);
-        jLabelVelocity.setBounds(48, 139, 200, 16);
+        jLabelVelocity.setBounds(50, 110, 150, 16);
         add(jSpinnerVelocity);
-        jSpinnerVelocity.setBounds(48, 173, 64, 22);
+        jSpinnerVelocity.setBounds(220, 110, 64, 22);
 
         jLabelPathYTDLP.setText("Ruta YT-DLP");
         add(jLabelPathYTDLP);
-        jLabelPathYTDLP.setBounds(48, 213, 130, 16);
+        jLabelPathYTDLP.setBounds(50, 150, 130, 16);
 
         jButtonPathYTDLP.setText("Seleccionar archivo");
         jButtonPathYTDLP.addActionListener(new java.awt.event.ActionListener() {
@@ -97,9 +107,9 @@ public class PreferencesPanel extends javax.swing.JPanel {
             }
         });
         add(jButtonPathYTDLP);
-        jButtonPathYTDLP.setBounds(40, 240, 160, 23);
+        jButtonPathYTDLP.setBounds(50, 180, 160, 23);
         add(jTextFieldPathYTDLP);
-        jTextFieldPathYTDLP.setBounds(220, 240, 277, 22);
+        jTextFieldPathYTDLP.setBounds(220, 180, 290, 22);
 
         jButton1.setText("!DESCARGAR YA!");
         jButton1.addActionListener(new java.awt.event.ActionListener() {
@@ -108,11 +118,12 @@ public class PreferencesPanel extends javax.swing.JPanel {
             }
         });
         add(jButton1);
-        jButton1.setBounds(140, 290, 260, 23);
+        jButton1.setBounds(160, 230, 260, 23);
     }// </editor-fold>//GEN-END:initComponents
     
     //FileChooser que permet navegar i seleccionar una ruta directori
     private void jButtonDownloadPathActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDownloadPathActionPerformed
+        jFileChooserGeneral.setDialogTitle("Selecciona la carpeta donde guardar");
         jFileChooserGeneral.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
         int result = jFileChooserGeneral.showOpenDialog(this);
         

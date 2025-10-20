@@ -16,13 +16,13 @@ public class SenseBrutor extends javax.swing.JFrame {
     
     public SenseBrutor() {
         initComponents();
-        setSize(600, 400);
+        setSize(550, 340);
         setLocationRelativeTo(null);
 
-        downloadpanel = new DownloadPanel(this); // panel principal
-        preferencesPanel = new PreferencesPanel(this); // panel de configuración
-        downloadpanel.setBounds(0, 0, 600, 400);
-        preferencesPanel.setBounds(0, 0, 600, 400);
+        downloadpanel = new DownloadPanel(this); 
+        preferencesPanel = new PreferencesPanel(this); 
+        downloadpanel.setBounds(0, 0, 550, 340);
+        preferencesPanel.setBounds(0, 0, 550, 340);
         // Mostramos primero el panel principal
         getContentPane().add(downloadpanel);
         getContentPane().add(preferencesPanel);
@@ -44,6 +44,8 @@ public class SenseBrutor extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        jDialogAbout = new javax.swing.JDialog();
+        jLabelNombre = new javax.swing.JLabel();
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenuFile = new javax.swing.JMenu();
         jMenuItemExit = new javax.swing.JMenuItem();
@@ -52,7 +54,16 @@ public class SenseBrutor extends javax.swing.JFrame {
         JMenuHelp = new javax.swing.JMenu();
         jMenuItemAbout = new javax.swing.JMenuItem();
 
+        jDialogAbout.setTitle("Acerca de");
+        jDialogAbout.setBounds(new java.awt.Rectangle(0, 0, 400, 325));
+        jDialogAbout.getContentPane().setLayout(null);
+
+        jLabelNombre.setText("<html>   <div style=\"text-align: center; font-family: Arial, sans-serif;\">     <img src=\"file:src/main/resources/images/logo.png\" width=\"100\" height=\"100\"><br><br>     <span style=\"font-size: 16pt; font-weight: bold;\">Andreu Anglada</span><br>     <span style=\"font-size: 12pt;\">Curso de Desarrollo de Interfaces - Grado Superior DAM</span><br><br>     <span style=\"font-size: 12pt; font-weight: bold;\">Recursos utilizados:</span><br>     <span style=\"font-size: 12pt;\">       YT-DLP, FFmpeg, Imágenes, NetBeans IDE 27, ChatGPT, YouTube canal SPDVI     </span><br><br>     <span style=\"font-size: 10pt; font-style: italic;\">       Gracias a todos los recursos mencionados por su disponibilidad.     </span>   </div> </html>");
+        jDialogAbout.getContentPane().add(jLabelNombre);
+        jLabelNombre.setBounds(70, 0, 250, 260);
+
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setIconImages(null);
         setResizable(false);
         getContentPane().setLayout(null);
 
@@ -83,6 +94,11 @@ public class SenseBrutor extends javax.swing.JFrame {
         JMenuHelp.setText("Ayuda");
 
         jMenuItemAbout.setText("Acerca de...");
+        jMenuItemAbout.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItemAboutActionPerformed(evt);
+            }
+        });
         JMenuHelp.add(jMenuItemAbout);
 
         jMenuBar1.add(JMenuHelp);
@@ -101,6 +117,14 @@ public class SenseBrutor extends javax.swing.JFrame {
         preferencesPanel.setVisible(true);
         
     }//GEN-LAST:event_jMenuItemPreferencesActionPerformed
+
+    private void jMenuItemAboutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemAboutActionPerformed
+        // Configurar el dialogo si es necesario
+        //jDialogAbout.setTitle("About");
+        jDialogAbout.setModal(true);              // asegura que sea modal
+        jDialogAbout.setLocationRelativeTo(this); // centra respecto al JFrame
+        jDialogAbout.setVisible(true); 
+    }//GEN-LAST:event_jMenuItemAboutActionPerformed
 
     /**
      * @param args the command line arguments
@@ -129,6 +153,8 @@ public class SenseBrutor extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenu JMenuHelp;
+    private javax.swing.JDialog jDialogAbout;
+    private javax.swing.JLabel jLabelNombre;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JMenu jMenuEdit;
     private javax.swing.JMenu jMenuFile;
