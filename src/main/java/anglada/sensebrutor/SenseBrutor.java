@@ -119,11 +119,10 @@ public class SenseBrutor extends javax.swing.JFrame {
     }//GEN-LAST:event_jMenuItemPreferencesActionPerformed
 
     private void jMenuItemAboutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemAboutActionPerformed
-        // Configurar el dialogo si es necesario
-        //jDialogAbout.setTitle("About");
-        jDialogAbout.setModal(true);              // asegura que sea modal
-        jDialogAbout.setLocationRelativeTo(this); // centra respecto al JFrame
-        jDialogAbout.setVisible(true); 
+
+        jDialogAbout.setModal(true);
+        jDialogAbout.setLocationRelativeTo(this);
+        jDialogAbout.setVisible(true);
     }//GEN-LAST:event_jMenuItemAboutActionPerformed
 
     /**

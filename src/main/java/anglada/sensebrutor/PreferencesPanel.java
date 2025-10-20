@@ -138,7 +138,7 @@ public class PreferencesPanel extends javax.swing.JPanel {
     //FileChooser que permet navegar i seleccionar una ruta arxiu
     private void jButtonPathYTDLPActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonPathYTDLPActionPerformed
         jFileChooserGeneral.setDialogTitle("Selecciona el archivo de yt-dlp");
-        jFileChooserGeneral.setFileSelectionMode(JFileChooser.FILES_ONLY); // 👈 Solo archivos
+        jFileChooserGeneral.setFileSelectionMode(JFileChooser.FILES_ONLY);
 
         int result = jFileChooserGeneral.showOpenDialog(this);
         if (result == JFileChooser.APPROVE_OPTION) {
