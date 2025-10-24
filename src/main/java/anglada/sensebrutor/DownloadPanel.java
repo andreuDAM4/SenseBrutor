@@ -110,6 +110,9 @@ public class DownloadPanel extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
     
     // Método simple per extreure el porcentge de descarrega la línea de yt-dlp per despres posar dins el progress bar
+    /**
+     * Font https://openai.com/es-ES/
+     */
     private Integer parsePercentage(String line) {
         try {
             line = line.trim();
@@ -127,6 +130,9 @@ public class DownloadPanel extends javax.swing.JPanel {
     
     /*Accio del boto descarregar, inclou progresbar i quan troba " " una vegada a finalitzat asigna la variable downloadedFilePath.
     downloadedFilePath serveix per una vegada descarregat obrir l'arxiu al reproductor predeterminat*/
+    /**
+     * Codi adaptat downloadVideo.java de Miguel Oscar García
+     */
     private void iniciarDescarga(String ytdlpPath, String url, String formatCode, String downloadPath, int maxVelocity) {
         jProgressBarDownload.setVisible(true);
         jProgressBarDownload.setValue(0);
@@ -270,6 +276,9 @@ public class DownloadPanel extends javax.swing.JPanel {
     }//GEN-LAST:event_jButtonPlayActionPerformed
     
     //Carrega els formats disponibles de la URL
+    /**
+     * Codi d'ajuda generat per la font https://openai.com/es-ES/
+     */
     private void loadFormats() {
         
         PreferencesPanel prefs = mainFrame.getPreferencesPanel();

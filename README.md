@@ -1,3 +1,5 @@
+Andreu Anglada Torres, 2 any DAM
+
 ##SenseBrutor
 
 SenseBrutor és una aplicació amb interfície gràfica (GUI) desenvolupada en Java que permet descarregar vídeos i àudios de YouTube i altres plataformes sense publicitat, utilitzant yt-dlp com a motor de descàrrega.
