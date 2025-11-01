@@ -12,7 +12,7 @@ public class PreferencesPanel extends javax.swing.JPanel {
     /**
      * Creates new form PreferencesPanel
      */
-    private SenseBrutor mainFrame;
+    private final SenseBrutor mainFrame;
     public PreferencesPanel(SenseBrutor mainFrame) {
         initComponents();
         this.mainFrame = mainFrame; 
@@ -69,12 +69,15 @@ public class PreferencesPanel extends javax.swing.JPanel {
         jFileChooserGeneral.setDialogTitle("Selecciona una carpeta para guardar");
         jFileChooserGeneral.setFileSelectionMode(javax.swing.JFileChooser.DIRECTORIES_ONLY);
 
+        setName("PreferencesPanel"); // NOI18N
         setLayout(null);
 
+        jLabelDownloadPathFile.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jLabelDownloadPathFile.setText("Guardar archivo en");
         add(jLabelDownloadPathFile);
         jLabelDownloadPathFile.setBounds(50, 10, 190, 16);
 
+        jButtonDownloadPath.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jButtonDownloadPath.setText("Seleccionar Carpeta");
         jButtonDownloadPath.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -86,20 +89,24 @@ public class PreferencesPanel extends javax.swing.JPanel {
         add(jTextFieldDownloadPath);
         jTextFieldDownloadPath.setBounds(220, 30, 281, 22);
 
+        jCheckBoxM3u.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jCheckBoxM3u.setText("Crear archivo .m3u");
         add(jCheckBoxM3u);
         jCheckBoxM3u.setBounds(50, 70, 170, 20);
 
+        jLabelVelocity.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jLabelVelocity.setText("Velocidad máxima (KB/s)");
         add(jLabelVelocity);
         jLabelVelocity.setBounds(50, 110, 150, 16);
         add(jSpinnerVelocity);
         jSpinnerVelocity.setBounds(220, 110, 64, 22);
 
+        jLabelPathYTDLP.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jLabelPathYTDLP.setText("Ruta YT-DLP");
         add(jLabelPathYTDLP);
         jLabelPathYTDLP.setBounds(50, 150, 130, 16);
 
+        jButtonPathYTDLP.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jButtonPathYTDLP.setText("Seleccionar archivo");
         jButtonPathYTDLP.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -111,6 +118,7 @@ public class PreferencesPanel extends javax.swing.JPanel {
         add(jTextFieldPathYTDLP);
         jTextFieldPathYTDLP.setBounds(220, 180, 290, 22);
 
+        jButton1.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jButton1.setText("!DESCARGAR YA!");
         jButton1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -132,6 +140,9 @@ public class PreferencesPanel extends javax.swing.JPanel {
             String ruta = carpeta.getAbsolutePath();
             // Guarda la ruta en una variable o textfield
             jTextFieldDownloadPath.setText(ruta);
+            if (mainFrame != null && mainFrame.getMediaFilePanel() != null) {
+                mainFrame.getMediaFilePanel().reloadIfConfigured();
+            }
         }
     }//GEN-LAST:event_jButtonDownloadPathActionPerformed
     

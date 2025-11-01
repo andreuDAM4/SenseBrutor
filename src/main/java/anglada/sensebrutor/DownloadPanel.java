@@ -18,7 +18,7 @@ public class DownloadPanel extends javax.swing.JPanel {
     /**
      * Creates new form DownloadPanel
      */
-    private SenseBrutor mainFrame;
+    private final SenseBrutor mainFrame;
     private String downloadedFilePath;
     public DownloadPanel(SenseBrutor mainFrame) {
         this.mainFrame = mainFrame;
@@ -51,6 +51,7 @@ public class DownloadPanel extends javax.swing.JPanel {
         jButtonPlay = new javax.swing.JButton();
         jLabelLoadFormat = new javax.swing.JLabel();
 
+        setName("DownloadPanel"); // NOI18N
         setLayout(null);
 
         jLabelTittle.setFont(new java.awt.Font("Consolas", 1, 24)); // NOI18N
@@ -58,6 +59,7 @@ public class DownloadPanel extends javax.swing.JPanel {
         add(jLabelTittle);
         jLabelTittle.setBounds(200, 10, 170, 29);
 
+        jLabelURL.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jLabelURL.setText("URL:");
         add(jLabelURL);
         jLabelURL.setBounds(70, 50, 30, 16);
@@ -70,6 +72,7 @@ public class DownloadPanel extends javax.swing.JPanel {
         add(jTextFieldURL);
         jTextFieldURL.setBounds(120, 48, 340, 30);
 
+        jLabelFormat.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jLabelFormat.setText("Formato:");
         add(jLabelFormat);
         jLabelFormat.setBounds(60, 90, 60, 16);
@@ -82,6 +85,7 @@ public class DownloadPanel extends javax.swing.JPanel {
         add(jComboBoxFormat);
         jComboBoxFormat.setBounds(120, 90, 340, 30);
 
+        jButtonDownload.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jButtonDownload.setText("Descargar");
         jButtonDownload.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -95,6 +99,7 @@ public class DownloadPanel extends javax.swing.JPanel {
         add(jLabelProgress);
         jLabelProgress.setBounds(260, 160, 100, 16);
 
+        jButtonPlay.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jButtonPlay.setText("Reproducir");
         jButtonPlay.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -104,6 +109,7 @@ public class DownloadPanel extends javax.swing.JPanel {
         add(jButtonPlay);
         jButtonPlay.setBounds(210, 220, 120, 23);
 
+        jLabelLoadFormat.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jLabelLoadFormat.setText("Cargando formatos...");
         add(jLabelLoadFormat);
         jLabelLoadFormat.setBounds(230, 160, 140, 16);
@@ -122,7 +128,7 @@ public class DownloadPanel extends javax.swing.JPanel {
                 float f = Float.parseFloat(perc); 
                 return Math.round(f); 
             }
-        } catch (Exception e) {
+        } catch (NumberFormatException e) {
             System.out.println("Error al sacar el % del progressbar");
         }
         return null;
@@ -139,11 +145,14 @@ public class DownloadPanel extends javax.swing.JPanel {
         jLabelProgress.setText("0%");
 
         SwingWorker<Void, Integer> worker = new SwingWorker<>() {
+            boolean formatError = false;
+            boolean yaExiste = false;
             @Override
             protected Void doInBackground() throws Exception {
                 ProcessBuilder pb = new ProcessBuilder(
                         ytdlpPath,
                         "--newline",
+                        "--restrict-filenames",
                         "-f", formatCode,
                         "-o", downloadPath + File.separator + "%(title)s.%(ext)s",
                         url
@@ -165,7 +174,16 @@ public class DownloadPanel extends javax.swing.JPanel {
                     System.out.println(line);
                     Integer percent = parsePercentage(line);
                     if (percent != null) publish(percent);
-
+                    
+                    // Agregat per si surt error hora de descargar per format inexistent
+                    if (line.contains("ERROR:")) {
+                        formatError = true;
+                    }
+                    //Mostrar mensatge dient que s'arxiu ja existeix
+                    if (line.contains("has already been downloaded")) {
+                        yaExiste = true;
+                    }
+                    
                     // Guardar la última línea que te comilles
                     if (line.contains("\"")) {
                         lastLineWithQuotes = line;
@@ -204,8 +222,27 @@ public class DownloadPanel extends javax.swing.JPanel {
 
             @Override
             protected void done() {
+                if (formatError) {
+                    JOptionPane.showMessageDialog(
+                        DownloadPanel.this,
+                        "El formato seleccionado no está disponible.",
+                        "Formato no disponible",
+                        JOptionPane.WARNING_MESSAGE
+                    );
+                    return;
+                }
+                if (yaExiste) {
+                    JOptionPane.showMessageDialog(
+                        DownloadPanel.this,
+                        "El archivo ya existe.",
+                        "El archivo ya existe.",
+                        JOptionPane.WARNING_MESSAGE
+                    );
+                    return;
+                }
                 if (downloadedFilePath != null && new File(downloadedFilePath).exists()) {
                     jButtonPlay.setVisible(true);
+                    mainFrame.getMediaFilePanel().reloadIfConfigured();
                 
                     PreferencesPanel prefs = mainFrame.getPreferencesPanel();
                     if (prefs.isCreateM3U()) {
@@ -251,7 +288,10 @@ public class DownloadPanel extends javax.swing.JPanel {
         jLabelProgress.setVisible(true);
         String ytdlpPath = prefs.getYTDLPPath();
         String selectedItem = (String) jComboBoxFormat.getSelectedItem();
-        String formatCode = (selectedItem != null) ? selectedItem.split("\\s+")[0] : "best";
+        String formatCode = "best";
+        if (selectedItem != null && selectedItem.contains("|")) {
+            formatCode = selectedItem.split("\\|")[0].trim();  // <- coge el número antes del '|'
+        }
         int maxVelocity = prefs.getMaxVelocity();
         String url = jTextFieldURL.getText().trim();
 
@@ -316,7 +356,7 @@ public class DownloadPanel extends javax.swing.JPanel {
                 String line;
                 while ((line = reader.readLine()) != null) {
                     
-                    if (line.matches("\\d+.*")) {
+                    if (line.trim().matches("^\\d+.*")) {
                         publish(line); 
                     }
                 }
@@ -330,11 +370,9 @@ public class DownloadPanel extends javax.swing.JPanel {
                 for (String formatLine : chunks) {
                     // LLevar el codi inicial i dexiar descripcio del format
                     String[] parts = formatLine.split("\\s+", 2); // separa en 2 parts: codi y resto
-                    if (parts.length > 1) {
-                        jComboBoxFormat.addItem(parts[1]); 
-                    } else {
-                        jComboBoxFormat.addItem(parts[0]); 
-                    }
+                    String code = parts[0];
+                    String desc = (parts.length > 1) ? parts[1] : "";
+                    jComboBoxFormat.addItem(code + " | " + desc);
                 }
             }
             @Override

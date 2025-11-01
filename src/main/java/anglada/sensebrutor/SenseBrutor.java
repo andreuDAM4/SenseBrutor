@@ -10,22 +10,35 @@ public class SenseBrutor extends javax.swing.JFrame {
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(SenseBrutor.class.getName());
     private DownloadPanel downloadpanel;
     private PreferencesPanel preferencesPanel;
+    private MediaFilePanel mediaFilePanel;
     /**
      * Creates new form SenseBrutor
      */
     
     public SenseBrutor() {
         initComponents();
-        setSize(550, 340);
-        setLocationRelativeTo(null);
 
-        downloadpanel = new DownloadPanel(this); 
-        preferencesPanel = new PreferencesPanel(this); 
-        downloadpanel.setBounds(0, 0, 550, 340);
-        preferencesPanel.setBounds(0, 0, 550, 340);
-        // Mostramos primero el panel principal
+        preferencesPanel = new PreferencesPanel(this);
+        downloadpanel = new DownloadPanel(this);
+        mediaFilePanel = new MediaFilePanel(this);
+
+
+        downloadpanel.setBounds(0, 0, 500, 340);
+        mediaFilePanel.setBounds(500, 0, 550, 340);
+        preferencesPanel.setBounds(0, 0, 500, 340);
+
+
         getContentPane().add(downloadpanel);
+        getContentPane().add(mediaFilePanel);
         getContentPane().add(preferencesPanel);
+
+        setLayout(null);
+        setSize(1050, 340);
+        setLocationRelativeTo(null);
+        setResizable(false);
+
+        downloadpanel.setVisible(true);
+        mediaFilePanel.setVisible(true);
         preferencesPanel.setVisible(false);
     }
     public void mostrarDownloadPanel() {
@@ -34,6 +47,9 @@ public class SenseBrutor extends javax.swing.JFrame {
     }
     public PreferencesPanel getPreferencesPanel() {
         return preferencesPanel;
+    }
+    public MediaFilePanel getMediaFilePanel() {
+        return mediaFilePanel;
     }
     /**
      * This method is called from within the constructor to initialize the form.
