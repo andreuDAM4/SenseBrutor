@@ -1,5 +1,5 @@
 ## SenseBrutor
-![SenseBrutor](resources/images/sensebrutor.png)
+![SenseBrutor](src/main/resources/images/sensebrutor.png)
 
 Andreu Anglada Torres, 2 any DAM
 
