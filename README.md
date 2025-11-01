@@ -17,13 +17,13 @@ SenseBrutor és una aplicació amb interfície gràfica (GUI) desenvolupada en J
 
 ##Panell de preferències
 
-Seleccionar carpeta on es descarregarà l'arxiu.
+-Seleccionar carpeta on es descarregarà l'arxiu.
 
-Crear arxiu .m3u, que si està marcat, a l'hora de descarregar es posarà l'arxiu dins una llista.
+-Crear arxiu .m3u, que si està marcat, a l'hora de descarregar es posarà l'arxiu dins una llista.
 
-Selecció de velocitat màxima de descàrrega, si es deixa a 0 no hi haurà màxim.
+-Selecció de velocitat màxima de descàrrega, si es deixa a 0 no hi haurà màxim.
 
-Ruta on tenim l’exe per executar els comands necessaris.
+-Ruta on tenim l’exe per executar els comands necessaris.
 
 ##Panell Descàrrega
 
