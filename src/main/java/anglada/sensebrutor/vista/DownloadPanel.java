@@ -1,5 +1,6 @@
-package anglada.sensebrutor;
+package anglada.sensebrutor.vista;
 
+import anglada.sensebrutor.SenseBrutor;
 import java.awt.Desktop;
 import java.io.BufferedReader;
 import java.io.File;

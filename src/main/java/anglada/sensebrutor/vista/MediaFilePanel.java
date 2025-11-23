@@ -1,5 +1,8 @@
-package anglada.sensebrutor;
+package anglada.sensebrutor.vista;
 
+import anglada.sensebrutor.SenseBrutor;
+import anglada.sensebrutor.model.MediaFileModel;
+import anglada.sensebrutor.model.MediaFileModel;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;

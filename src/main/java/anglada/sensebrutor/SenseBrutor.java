@@ -1,45 +1,73 @@
 
 package anglada.sensebrutor;
 
+import anglada.sensebrutor.model.ApiClient;
+import anglada.sensebrutor.vista.MediaFilePanel;
+import anglada.sensebrutor.vista.DownloadPanel;
+import anglada.sensebrutor.vista.LoginPanel;
+import anglada.sensebrutor.vista.PreferencesPanel;
+import javax.swing.JMenuItem;
+
+
 /**
  *
  * @author Andreu
  */
-public class SenseBrutor extends javax.swing.JFrame {
-    
-    private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(SenseBrutor.class.getName());
-    private DownloadPanel downloadpanel;
-    private PreferencesPanel preferencesPanel;
-    private MediaFilePanel mediaFilePanel;
+public final class SenseBrutor extends javax.swing.JFrame {
+    public String jwt = "";
+    private final DownloadPanel downloadpanel;
+    private final PreferencesPanel preferencesPanel;
+    private final MediaFilePanel mediaFilePanel;
+    private final LoginPanel loginPanel;
+    private final ApiClient apiClient = new ApiClient("https://dimedianetapi9.azurewebsites.net");
     /**
      * Creates new form SenseBrutor
      */
     
     public SenseBrutor() {
         initComponents();
-
+        
         preferencesPanel = new PreferencesPanel(this);
         downloadpanel = new DownloadPanel(this);
         mediaFilePanel = new MediaFilePanel(this);
-
+        loginPanel = new LoginPanel(this, apiClient);
+        
+        JMenuItem logoutItem = new JMenuItem("Cerrar sesión");
+        logoutItem.addActionListener(e -> {
+            loginPanel.limpiar();
+            mostrarLogin();
+        });
+        jMenuFile.insert(logoutItem, 0);
 
         downloadpanel.setBounds(0, 0, 500, 340);
         mediaFilePanel.setBounds(500, 0, 550, 340);
         preferencesPanel.setBounds(0, 0, 500, 340);
-
+        loginPanel.setBounds(0, 0, 1050, 340);
 
         getContentPane().add(downloadpanel);
         getContentPane().add(mediaFilePanel);
         getContentPane().add(preferencesPanel);
-
+        getContentPane().add(loginPanel);
         setLayout(null);
         setSize(1050, 340);
         setLocationRelativeTo(null);
         setResizable(false);
+        
+        mostrarLogin();
 
+    }
+    public void mostrarLogin() {
+        downloadpanel.setVisible(false);
+        mediaFilePanel.setVisible(false);
+        preferencesPanel.setVisible(false);
+        loginPanel.setVisible(true);
+        jMenuItemPreferences.setEnabled(false);
+    }
+    public void loginCorrecto() {
+        loginPanel.setVisible(false);
         downloadpanel.setVisible(true);
         mediaFilePanel.setVisible(true);
-        preferencesPanel.setVisible(false);
+        jMenuItemPreferences.setEnabled(true);
     }
     public void mostrarDownloadPanel() {
         preferencesPanel.setVisible(false);
@@ -145,22 +173,7 @@ public class SenseBrutor extends javax.swing.JFrame {
      * @param args the command line arguments
      */
     public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ReflectiveOperationException | javax.swing.UnsupportedLookAndFeelException ex) {
-            logger.log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
+        
 
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(() -> new SenseBrutor().setVisible(true));

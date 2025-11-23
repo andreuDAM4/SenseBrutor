@@ -5,7 +5,18 @@ Andreu Anglada Torres, 2 any DAM
 
 SenseBrutor és una aplicació amb interfície gràfica (GUI) desenvolupada en Java que permet descarregar vídeos i àudios de YouTube i altres plataformes sense publicitat, utilitzant yt-dlp com a motor de descàrrega.
 
-##Panell inicial
+## Panell Login
+- Pantalla d'inici de sessió (sense NetBeans Designer).
+- Connexió real amb l'API DiMediaNet: https://dimedianetapi9.azurewebsites.net
+- Login amb email i contrasenya mitjançant POST a /api/Auth/login
+- Emmagatzematge del token JWT per a totes les peticions posteriors.
+- Casella "Recordarme" que conserva l'email i contrasenya en tancar sessió.
+- Opció "Cerrar sesión" al menú Archivo que torna al panell de login i neteja les credencials.
+- Tasques fetes amb Postman:
+  - Registre d'usuari: andreuanglada@whatever.ever
+  - Pujada de mínim 3 arxius multimèdia (ID:48, ID:49, ID:50)
+
+## Panell Descarrega
 
 -Es pot afegir una URL de YouTube per començar la descàrrega.
 
@@ -15,7 +26,7 @@ SenseBrutor és una aplicació amb interfície gràfica (GUI) desenvolupada en J
 
 -El botó Descarregar estarà desactivat fins que els formats disponibles no hagin estat completament carregats.
 
-##Panell de preferències
+## Panell de preferències
 
 -Seleccionar carpeta on es descarregarà l'arxiu.
 
@@ -25,7 +36,7 @@ SenseBrutor és una aplicació amb interfície gràfica (GUI) desenvolupada en J
 
 -Ruta on tenim l’exe per executar els comands necessaris.
 
-##Panell Descàrrega
+## Panell Descàrrega
 
 La descàrrega només és possible si al panell de configuració s'ha fet el següent:
 
@@ -39,7 +50,7 @@ La descàrrega només és possible si al panell de configuració s'ha fet el seg
 
 -Un cop completada la descàrrega, es farà visible un botó que permet reproduir l'arxiu acabat de descarregar directament des de l'aplicació.
 
-##Panell biblioteca de medis
+## Panell biblioteca de medis
 
 -Permet cercar en temps real de dins la carpeta que tenim com a sortida el nom d’un arxiu.
 
@@ -53,13 +64,13 @@ La descàrrega només és possible si al panell de configuració s'ha fet el seg
 
 -(EXTRA) Permet reproduir de la taula el que tenim seleccionat amb el reproductor que tenim per defecte.
 
-##Acerca de
+## Acerca de
 
 -Conté el logo de l’aplicació.
 
 -Nom de l’alumne, amb curs i els recursos utilitzats.
 
-##Funcionalitats extra
+## Funcionalitats extra
 
 -He afegit la funcionalitat de poder triar el format de sortida segons el que la URL pugui oferir.
 
@@ -79,14 +90,14 @@ La descàrrega només és possible si al panell de configuració s'ha fet el seg
 
 -He afegit que si el format seleccionat no està disponible mostri un missatge informatiu.
 
-##Problemes
+## Problemes
 
 -No sabia gaire bé com fer per carregar els formats, m’ha duit bastant de temps però finalment ho he deixat com al principi. Una vegada es surt de posar
 la URL, s’inicia la càrrega de formats.
 
 -Problemes amb caràcters estranys o accents una vegada descarregat l’arxiu per reproduir-lo. Solucionat afegint la línia "--restrict-filenames", dins la funció d’iniciar la descàrrega.
 
-##Recursos
+## Recursos
 
 -https://www.youtube.com/@spdvi7370
 

@@ -1,4 +1,4 @@
-package anglada.sensebrutor;
+package anglada.sensebrutor.model;
 
 /**
  * Clase que donat un arxiu retorna nom, ruta, pes, tipus i data
