@@ -22,9 +22,6 @@ public class LoginPanel extends JPanel {
     private JButton loginButton;
     private JLabel statusLabel;
 
-    private String rememberedEmail = "";
-    private String rememberedPass = "";
-
     public LoginPanel(SenseBrutor main, ApiClient apiClient) {
         this.main = main;
         this.apiClient = apiClient;
@@ -89,14 +86,11 @@ public class LoginPanel extends JPanel {
         new Thread(() -> {
             try {
                 String token = apiClient.login(email, password);
-
-                // Guardar email i contrasenya si es marca "Recordarme"
+                //Es guarda token a un fitxer
                 if (rememberCheck.isSelected()) {
-                    rememberedEmail = email;
-                    rememberedPass = password;
+                    main.guardarSesion(token);
                 } else {
-                    rememberedEmail = "";
-                    rememberedPass = "";
+                    main.borrarSesion();
                 }
 
                 // Guardar jwt dins main
@@ -122,19 +116,9 @@ public class LoginPanel extends JPanel {
 
     /** Utilitzat desde el menu cerrar sesión */
     public void limpiar() {
-        if (!rememberedEmail.isBlank()) {
-            emailField.setText(rememberedEmail);
-        } else {
-            emailField.setText("");
-        }
-
-        // Restaurar contraseña si existía
-        if (!rememberedPass.isBlank()) {
-            passwordField.setText(rememberedPass);
-        } else {
-            passwordField.setText("");
-        }
-
+        emailField.setText("");
+        passwordField.setText("");
         statusLabel.setText("");
+        rememberCheck.setSelected(false);
     }
 }

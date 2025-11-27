@@ -6,6 +6,10 @@ import anglada.sensebrutor.vista.MediaFilePanel;
 import anglada.sensebrutor.vista.DownloadPanel;
 import anglada.sensebrutor.vista.LoginPanel;
 import anglada.sensebrutor.vista.PreferencesPanel;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.Files;
 import javax.swing.JMenuItem;
 
 
@@ -20,6 +24,7 @@ public final class SenseBrutor extends javax.swing.JFrame {
     private final MediaFilePanel mediaFilePanel;
     private final LoginPanel loginPanel;
     private final ApiClient apiClient = new ApiClient("https://dimedianetapi9.azurewebsites.net");
+    private final File sessionFile = new File("session/session.dat");
     /**
      * Creates new form SenseBrutor
      */
@@ -34,6 +39,8 @@ public final class SenseBrutor extends javax.swing.JFrame {
         
         JMenuItem logoutItem = new JMenuItem("Cerrar sesión");
         logoutItem.addActionListener(e -> {
+            borrarSesion();   // borra archivo
+            this.jwt = "";    // borra token en memoria  <-------
             loginPanel.limpiar();
             mostrarLogin();
         });
@@ -53,8 +60,51 @@ public final class SenseBrutor extends javax.swing.JFrame {
         setLocationRelativeTo(null);
         setResizable(false);
         
-        mostrarLogin();
+        //Cargar sesió 
+        String savedToken = leerSesion();
+        if (!savedToken.isEmpty()) {
+            this.jwt = savedToken;
+            try {
+                // intenta obtenir dades del usuari amb es token
+                apiClient.getMe(jwt); 
+                //mostrar paneles
+                loginCorrecto();
+            } catch (Exception ex) {
+                // token inválido o expirado
+                this.jwt = "";
+                borrarSesion();
+                mostrarLogin();
+            }
+        } else {
+            mostrarLogin();
+        }
+    }
 
+    // Guard Token en un fitxer
+    public void guardarSesion(String token) {
+        try {
+            //Crei carpeta si es necesari
+            sessionFile.getParentFile().mkdirs();
+            FileWriter fw = new FileWriter(sessionFile);
+            fw.write(token);
+            fw.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    //Si existeix es fitxer intent llegir-lo
+    public String leerSesion() {
+        try {
+            if (!sessionFile.exists()) return "";
+            return new String(Files.readAllBytes(sessionFile.toPath())).trim();
+        } catch (Exception e) {
+            return "";
+        }
+    }
+    
+    //Quan es pitja cerrar sesion o quan ha expirat s'esborra fitxer
+    public void borrarSesion() {
+        if (sessionFile.exists()) sessionFile.delete();
     }
     public void mostrarLogin() {
         downloadpanel.setVisible(false);
@@ -62,12 +112,15 @@ public final class SenseBrutor extends javax.swing.JFrame {
         preferencesPanel.setVisible(false);
         loginPanel.setVisible(true);
         jMenuItemPreferences.setEnabled(false);
+
     }
     public void loginCorrecto() {
         loginPanel.setVisible(false);
         downloadpanel.setVisible(true);
         mediaFilePanel.setVisible(true);
+        preferencesPanel.setVisible(false);
         jMenuItemPreferences.setEnabled(true);
+
     }
     public void mostrarDownloadPanel() {
         preferencesPanel.setVisible(false);
