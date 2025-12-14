@@ -162,8 +162,7 @@ public class MediaFilePanel extends javax.swing.JPanel {
                 carregarDades();
             }
         }
-    }
-    
+    } 
 
     /**
     * Funció per mostrar els arxius a la taula.
