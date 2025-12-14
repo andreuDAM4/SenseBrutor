@@ -7,7 +7,7 @@ SenseBrutor és una aplicació amb interfície gràfica (GUI) desenvolupada en J
 
 ## Panell Login
 - Pantalla d'inici de sessió (sense NetBeans Designer).
-- Connexió real amb l'API DiMediaNet: https://dimedianetapi9.azurewebsites.net
+- Connexió real amb l'API DiMediaNet: https://difreenet9.azurewebsites.net
 - Login amb email i contrasenya mitjançant POST a /api/Auth/login
 - Emmagatzematge del token JWT per a totes les peticions posteriors.
 - Casella "Recordarme" que conserva l'email i contrasenya en tancar sessió.
@@ -26,6 +26,19 @@ SenseBrutor és una aplicació amb interfície gràfica (GUI) desenvolupada en J
 
 - El botó Descarregar estarà desactivat fins que els formats disponibles no hagin estat completament carregats.
 
+- Si el format seleccionat no està disponible, apareix un missatge informatiu.
+
+- Validacions:
+  - No es pot descarregar si la carpeta de sortida no està definida.
+  - No es pot descarregar si no es troba l’executable `yt-dlp.exe`.
+  - Missatge informatiu si l’arxiu ja està descarregat.
+
+- Opcionalment:
+  - Afegir l’arxiu a un arxiu `.m3u`.
+  - Establir velocitat màxima de descàrrega.
+
+- Un cop finalitzada la descàrrega, es mostra un botó que permet reproduir l’arxiu descarregat.
+
 ## Panell de preferències
 
 - Seleccionar carpeta on es descarregarà l'arxiu.
@@ -36,33 +49,49 @@ SenseBrutor és una aplicació amb interfície gràfica (GUI) desenvolupada en J
 
 - Ruta on tenim l’exe per executar els comands necessaris.
 
-## Panell Descàrrega
+## DIMediaNetPollingComponent
+- Componente JavaBean desenvolupat per interactuar amb **DI Media Network**.
 
-La descàrrega només és possible si al panell de configuració s'ha fet el següent:
+- Funciona com a intermediari entre la GUI i l’API REST.
 
-- Seleccionar la ruta on es vol guardar l'arxiu descarregat.
+- Característiques:
+  - Consulta periòdica del servidor cada X segons (`pollingInterval`).
+  - Manté un token JWT per autenticar les peticions.
+  - Permet descarregar, pujar i obtenir informació dels fitxers remots.
+  - Notifica la GUI amb **listeners** quan arriben nous fitxers remots.
 
-- Afegir l'arxiu a una llista .m3u si es desitja.
+## Panell Biblioteca de Medis
+- Llista tots els arxius dins la carpeta de sortida, combinant fitxers locals i remots.
 
-- Establir una velocitat màxima de descàrrega (opcional).
+- Funcionalitat de **cerca en temps real** per nom.
 
-- Seleccionar la ruta de l'arxiu executable yt-dlp.exe.
+- Filtres per:
+  - Estat: `LOCAL`, `REMOTO`, `AMBOS` o **Tots**.
+  - Tipus MIME (àudio, vídeo, etc.).
 
-- Un cop completada la descàrrega, es farà visible un botó que permet reproduir l'arxiu acabat de descarregar directament des de l'aplicació.
+- Botons disponibles segons l’estat del fitxer seleccionat:
 
-## Panell biblioteca de medis
+| Estat de l’arxiu | Botó principal | Acció | Botó Eliminar |
+|------------------|----------------|-------|---------------|
+| `LOCAL`          | Subir          | Pujar al servidor | Actiu |
+| `REMOTO`         | Descargar      | Descarregar a carpeta local | Inactiu |
+| `AMBOS`          | Reproducir     | Reproduir amb el reproductor per defecte | Actiu |
+| Cap fitxer       | Deshabilitat   | - | Deshabilitat |
 
-- Permet cercar en temps real de dins la carpeta que tenim com a sortida el nom d’un arxiu.
+- Quan es selecciona un fitxer, els botons s’actualitzen automàticament segons l’estat.
 
-- Permet seleccionar el tipus d’arxiu que volem filtrar (tots, àudio o vídeo).
+- La taula s’actualitza automàticament:
+  - Quan es descarrega un nou arxiu.
+  - Quan es canvia la carpeta de sortida.
 
-- Llista tots els tipus d’arxius que hi tenim dins la carpeta i, a l’hora de seleccionar-ho, filtra per aquests.
+- Permet eliminar l’arxiu seleccionat localment.
 
-- Permet actualitzar la taula per si s’han afegit arxius.
+- Permet reproduir l’arxiu seleccionat amb el reproductor per defecte del sistema.
 
-- Permet eliminar l’arxiu que tenim seleccionat.
-
-- (EXTRA) Permet reproduir de la taula el que tenim seleccionat amb el reproductor que tenim per defecte.
+- Validacions:
+  - Missatge si l’arxiu no existeix localment.
+  - Missatge si l’arxiu remot no existeix.
+  - Missatge si el format seleccionat no és vàlid.
 
 ## Acerca de
 
@@ -89,6 +118,8 @@ La descàrrega només és possible si al panell de configuració s'ha fet el seg
 - He afegit que si l’arxiu ja estava descarregat surti un missatge informatiu.
 
 - He afegit que si el format seleccionat no està disponible mostri un missatge informatiu.
+
+- Botons de la taula actualitzats segons l’estat dels fitxers (LOCAL, REMOTO, AMBOS).
 
 ## Problemes
 

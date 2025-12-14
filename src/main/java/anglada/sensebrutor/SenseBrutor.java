@@ -1,7 +1,7 @@
 
 package anglada.sensebrutor;
 
-import anglada.sensebrutor.model.ApiClient;
+import anglada.dimedianetpollingcomponent.DIMediaNetPollingComponent;
 import anglada.sensebrutor.vista.MediaFilePanel;
 import anglada.sensebrutor.vista.DownloadPanel;
 import anglada.sensebrutor.vista.LoginPanel;
@@ -23,7 +23,7 @@ public final class SenseBrutor extends javax.swing.JFrame {
     private final PreferencesPanel preferencesPanel;
     private final MediaFilePanel mediaFilePanel;
     private final LoginPanel loginPanel;
-    private final ApiClient apiClient = new ApiClient("https://dimedianetapi9.azurewebsites.net");
+
     private final File sessionFile = new File("session/session.dat");
     /**
      * Creates new form SenseBrutor
@@ -31,17 +31,18 @@ public final class SenseBrutor extends javax.swing.JFrame {
     
     public SenseBrutor() {
         initComponents();
-        
+        diMediaPolling.setVisible(false);
         preferencesPanel = new PreferencesPanel(this);
         downloadpanel = new DownloadPanel(this);
         mediaFilePanel = new MediaFilePanel(this);
-        loginPanel = new LoginPanel(this, apiClient);
+        loginPanel = new LoginPanel(this);
         
         JMenuItem logoutItem = new JMenuItem("Cerrar sesión");
         logoutItem.addActionListener(e -> {
             borrarSesion();   // borra archivo
-            this.jwt = "";    // borra token en memoria  <-------
+            this.jwt = "";    // borra token en memoria
             loginPanel.limpiar();
+            preferencesPanel.reiniciar(); // neteja configuració
             mostrarLogin();
         });
         jMenuFile.insert(logoutItem, 0);
@@ -66,7 +67,9 @@ public final class SenseBrutor extends javax.swing.JFrame {
             this.jwt = savedToken;
             try {
                 // intenta obtenir dades del usuari amb es token
-                apiClient.getMe(jwt); 
+                diMediaPolling.setToken(jwt);
+                diMediaPolling.obtenirSessio();
+                diMediaPolling.setRunning(true); // Comprovar arxius servidor
                 //mostrar paneles
                 loginCorrecto();
             } catch (Exception ex) {
@@ -132,6 +135,10 @@ public final class SenseBrutor extends javax.swing.JFrame {
     public MediaFilePanel getMediaFilePanel() {
         return mediaFilePanel;
     }
+    public DIMediaNetPollingComponent getDiMediaPolling() {
+        return diMediaPolling;
+    }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -143,6 +150,7 @@ public final class SenseBrutor extends javax.swing.JFrame {
 
         jDialogAbout = new javax.swing.JDialog();
         jLabelNombre = new javax.swing.JLabel();
+        diMediaPolling = new anglada.dimedianetpollingcomponent.DIMediaNetPollingComponent();
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenuFile = new javax.swing.JMenu();
         jMenuItemExit = new javax.swing.JMenuItem();
@@ -163,6 +171,8 @@ public final class SenseBrutor extends javax.swing.JFrame {
         setIconImages(null);
         setResizable(false);
         getContentPane().setLayout(null);
+        getContentPane().add(diMediaPolling);
+        diMediaPolling.setBounds(10, 10, 130, 90);
 
         jMenuFile.setText("Archivo");
 
@@ -234,6 +244,7 @@ public final class SenseBrutor extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenu JMenuHelp;
+    private anglada.dimedianetpollingcomponent.DIMediaNetPollingComponent diMediaPolling;
     private javax.swing.JDialog jDialogAbout;
     private javax.swing.JLabel jLabelNombre;
     private javax.swing.JMenuBar jMenuBar1;

@@ -1,12 +1,15 @@
 package anglada.sensebrutor.vista;
 
+import anglada.dimedianetpollingcomponent.DIMediaNetPollingComponent;
+import anglada.dimedianetpollingcomponent.events.EventNousFitxers;
+import anglada.dimedianetpollingcomponent.events.ListenerNousFitxers;
+import anglada.dimedianetpollingcomponent.model.Media;
 import anglada.sensebrutor.SenseBrutor;
 import anglada.sensebrutor.model.MediaFileModel;
-import anglada.sensebrutor.model.MediaFileModel;
+import anglada.sensebrutor.model.UnifiedMediaModel;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
-import java.util.stream.Collectors;
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -22,21 +25,39 @@ import java.time.format.DateTimeFormatter;;
 public class MediaFilePanel extends javax.swing.JPanel {
 
     private final SenseBrutor mainFrame;
-    private final List<MediaFileModel> allFiles;
-    private List<MediaFileModel> filteredFiles;
+    private final DIMediaNetPollingComponent diComponent;
+    private final List<UnifiedMediaModel> allMedia;
+    private final List<UnifiedMediaModel> filteredMedia;
+    
     private MediaTableModel tableModel;
     private DefaultListModel<String> mimeListModel;
     private DefaultComboBoxModel<String> filterModel;
     
     public MediaFilePanel(SenseBrutor mainFrame) {
         this.mainFrame = mainFrame;
+        this.diComponent = mainFrame.getDiMediaPolling();
+
         initComponents();
-        allFiles = new ArrayList<>();
-        filteredFiles = new ArrayList<>();
-    
+        allMedia = new ArrayList<>();
+        filteredMedia = new ArrayList<>();
+
         setupModels();
         setupListeners();
+        // Afegim un listener al polling per actualitzar la taula automàticament
+        diComponent.afegirListenerNousFitxers(new ListenerNousFitxers() {
+            @Override
+            public void hiHaNousFitxers(EventNousFitxers evt) {
+                SwingUtilities.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        carregarDades();
+                    }
+                });
+            }
+        });
+        carregarDades();
     }
+    
     private void setupModels() {
          // Asignar AbstractTableModel
         tableModel = new MediaTableModel();
@@ -53,8 +74,9 @@ public class MediaFilePanel extends javax.swing.JPanel {
         // Categories fixes
         filterModel = new DefaultComboBoxModel<>();
         filterModel.addElement("Todos");
-        filterModel.addElement("Video");
-        filterModel.addElement("Audio");
+        filterModel.addElement("Local");
+        filterModel.addElement("Remoto");
+        filterModel.addElement("Ambos");
         jComboBoxFilter.setModel(filterModel);
     }
     
@@ -79,11 +101,56 @@ public class MediaFilePanel extends javax.swing.JPanel {
         // Habilitar boto eliminar
         jTable.getSelectionModel().addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) {
-                jButtonDelete.setEnabled(jTable.getSelectedRow() != -1);
-                jButtonPlay.setEnabled(jTable.getSelectedRow() != -1);
+                int selectedRow = jTable.getSelectedRow();
+                if (selectedRow == -1) {
+                    jButtonPlay.setEnabled(false);
+                    jButtonDelete.setEnabled(false);
+                    return;
+                }
+
+                UnifiedMediaModel media = filteredMedia.get(selectedRow);
+                //Actualitzacio de lu que apareix al boto segons l'estat
+                switch (media.getEstado()) {
+                    case LOCAL -> {
+                        jButtonPlay.setText("Subir");
+                        jButtonPlay.setEnabled(true);
+                        jButtonDelete.setEnabled(true);
+                    }
+                    case REMOTO -> {
+                        jButtonPlay.setText("Descargar");
+                        jButtonPlay.setEnabled(true);
+                        jButtonDelete.setEnabled(false);
+                    }
+                    case AMBOS -> {
+                        jButtonPlay.setText("Reproducir");
+                        jButtonPlay.setEnabled(true);
+                        jButtonDelete.setEnabled(true);
+                    }
+                }
             }
         });
+    }
+    
+    // Actualiza la llista de tipus MIME disponibles a la interfaç
+    // Recorre tots els fitxers, obte tipus, ordena y elimina duplicats
+    private void actualizarMimeList() {
+        mimeListModel.clear();
 
+        // Empram un conjunt per guardar tipus MIME sense repetir i ordenats
+        Set<String> mimes = new TreeSet<>();
+
+        // Recorrem tots els arxius de sa biblio
+        for (UnifiedMediaModel media : allMedia) {
+            String tipo = media.getMime(); // Agafam tipus mime de fitxer
+            // Agregam els que no siguin nulls ni en blanc
+            if (tipo != null && !tipo.isBlank()) {
+                mimes.add(tipo);
+            }
+        }
+
+        for (String mime : mimes) {
+            mimeListModel.addElement(mime);
+        }
     }
     
     //Carrega sa biblioteca de medis a l'hora de seleccionar una carpeta de sortida
@@ -92,117 +159,253 @@ public class MediaFilePanel extends javax.swing.JPanel {
         if (path != null && !path.isEmpty()) {
             File folder = new File(path);
             if (folder.exists() && folder.isDirectory()) {
-                loadMediaFiles();
+                carregarDades();
             }
         }
     }
     
-    //Funcio per mostrar es arxius a sa taula
-    private void loadMediaFiles() {
-        String path = mainFrame.getPreferencesPanel().getDownloadPath();
-        if (path == null || path.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Configura la carpeta de descargas.");
-            return;
-        }
 
-        File folder = new File(path);
-        File[] files = folder.listFiles(File::isFile);
-        if (files == null) return;
+    /**
+    * Funció per mostrar els arxius a la taula.
+    * Carrega tots els arxius de manera unificada, combinant arxius locals i remots.
+    */
+    private void carregarDades() {
+        allMedia.clear();
 
-        allFiles.clear();
-        Set<String> mimeSet = new HashSet<>();
-        
-        
-        for (File f : files) {
-            MediaFileModel mf = new MediaFileModel(f);
-            allFiles.add(mf);
-            if (!mf.getMimeType().equals("unknown")) {
-                mimeSet.add(mf.getMimeType());
+        // Mapa temporal per unir arxius locals i remots usant el nom com a clau
+        Map<String, UnifiedMediaModel> mapa = new HashMap<>();
+
+        //CARREGAR ARXIUS LOCALS
+        String rutaDescargas = mainFrame.getPreferencesPanel().getDownloadPath();
+        if (rutaDescargas != null && !rutaDescargas.isEmpty()) {
+            File carpeta = new File(rutaDescargas);
+            File[] totsArxius = carpeta.listFiles(); // Obté tots els fitxers de la carpeta
+
+            if (totsArxius != null) {
+                for (File arxiu : totsArxius) {
+                    // Comprovar que és un fitxer i no una carpeta
+                    if (arxiu.isFile()) {
+                        // Crear model del fitxer local
+                        MediaFileModel modelLocal = new MediaFileModel(arxiu);
+
+                        // Crear objecte unificat
+                        UnifiedMediaModel mediaLocal = new UnifiedMediaModel();
+                        mediaLocal.setNombre(modelLocal.getName());
+                        mediaLocal.setSize(modelLocal.getSize());
+                        mediaLocal.setMime(modelLocal.getMimeType());
+                        mediaLocal.setDate(modelLocal.getDate());
+                        mediaLocal.setLocalFile(arxiu);
+                        mediaLocal.setEstado(UnifiedMediaModel.Estado.LOCAL);
+
+                        // Guardar al mapa amb el nom com a clau
+                        mapa.put(mediaLocal.getNombre(), mediaLocal);
+                    }
+                }
             }
         }
 
-        // Actualitzar JList amb unics
-        mimeListModel.clear();
-        mimeSet.stream().sorted().forEach(mimeListModel::addElement);
+        //CARREGAR ARXIUS REMOTS
+        try {
+            List<Media> arxiusRemots = diComponent.obtenirTotsElsFitxers();
 
+            for (Media arxiuRemot : arxiusRemots) {
+                // Comprovar si ja existeix un fitxer local amb el mateix nom
+                UnifiedMediaModel media = mapa.get(arxiuRemot.mediaFileName);
+
+                if (media != null && media.getLocalFile() != null && media.getLocalFile().exists()) {
+                    // Ja existeix fitxer local: actualitzar informació remota i estat
+                    media.setRemoteMedia(arxiuRemot);
+                    media.setEstado(UnifiedMediaModel.Estado.AMBOS);
+                } else {
+                    // No existeix fitxer local: crear objecte només amb informació remota
+                    UnifiedMediaModel mediaRemot = new UnifiedMediaModel();
+                    mediaRemot.setNombre(arxiuRemot.mediaFileName);
+                    mediaRemot.setMime(arxiuRemot.mediaMimeType);
+                    mediaRemot.setRemoteMedia(arxiuRemot);
+                    mediaRemot.setEstado(UnifiedMediaModel.Estado.REMOTO);
+
+                    // Guardar al mapa
+                    mapa.put(mediaRemot.getNombre(), mediaRemot);
+                }
+            }
+        } catch (Exception e) {
+            // Pot passar si no hi ha carpeta local o fallada de xarxa; no crític
+            System.err.println("Avís xarxa (no crític): " + e.getMessage());
+        }
+
+        //Afegir tots els arxius del mapa a la llista principal
+        allMedia.addAll(mapa.values());
+
+        // Actualitzar la llista de tipus MIME per a filtres
+        actualizarMimeList();
+
+        // Aplicar filtres actius si n’hi ha
         applyFilters();
     }
 
-    // Filtrar una vegada seleccionat es tipus des comobox
+    /**
+     * Funció per filtrar arxius segons la recerca, estat i tipus MIME seleccionats
+     */
     private void applyFilters() {
-        String search = jTextFieldBuscar.getText().toLowerCase();
-        String filter = (String) jComboBoxFilter.getSelectedItem();
-        String selectedMime = jListMimeTypes.getSelectedValue();
+        //Obtenir els filtres seleccionats per l'usuari
+        String textBusqueda = jTextFieldBuscar.getText().toLowerCase();
+        String filtroEstado = (String) jComboBoxFilter.getSelectedItem();
+        String filtroMime = jListMimeTypes.getSelectedValue();
 
-        filteredFiles = allFiles.stream()
-            .filter(mf -> mf.getName().toLowerCase().contains(search))
-            .filter(mf -> filter.equals("Todos") ||
-                (filter.equals("Video") && mf.getMimeType().startsWith("video/")) ||
-                (filter.equals("Audio") && mf.getMimeType().startsWith("audio/")))
-            .filter(mf -> selectedMime == null || selectedMime.equals(mf.getMimeType()))
-            .collect(Collectors.toList());
+        //Netejar la llista de resultats filtrats
+        filteredMedia.clear();
 
-        tableModel.updateData(filteredFiles);
+        //Recórrer tots els arxius i aplicar filtres
+        for (UnifiedMediaModel media : allMedia) {
+            // Filtrar per nom (recerca)
+            if (!media.getNombre().toLowerCase().contains(textBusqueda)) continue;
+
+            // Filtrar per estat (Tots, LOCAL, REMOT, AMBOS)
+            if (!"Todos".equals(filtroEstado) && !media.getEstado().name().equalsIgnoreCase(filtroEstado)) continue;
+
+            // Filtrar per tipus MIME
+            if (filtroMime != null && !filtroMime.equals(media.getMime())) continue;
+
+            // Si passa tots els filtres, afegir a la llista filtrada
+            filteredMedia.add(media);
+        }
+
+        //Actualitzar la taula amb els resultats filtrats
+        tableModel.updateData(filteredMedia);
     }
 
-    //Funcio que elimina s'arxiu seleccionat
+    /**
+     * Funció per eliminar l'arxiu seleccionat de la taula i del disc
+     */
     private void deleteSelectedFile() {
-        int selectedRow = jTable.getSelectedRow();
-        if (selectedRow == -1) {
-            JOptionPane.showMessageDialog(this, "Selecciona un archivo de la tabla para eliminar.");
+        int filaSeleccionada = jTable.getSelectedRow();
+        if (filaSeleccionada == -1) {
+            JOptionPane.showMessageDialog(this,
+                    "Selecciona un fitxer de la taula per eliminar.");
             return;
         }
 
-        MediaFileModel mf = filteredFiles.get(selectedRow);
+        UnifiedMediaModel media = filteredMedia.get(filaSeleccionada);
+
+        // No existeix localment
+        if (media.getLocalFile() == null || !media.getLocalFile().exists()) {
+            JOptionPane.showMessageDialog(this,
+                    "Aquest fitxer no existeix localment.");
+            return;
+        }
 
         int confirm = JOptionPane.showConfirmDialog(
-            this,
-            "¿Eliminar '" + mf.getName() + "'?",
-            "Confirmar eliminación",
-            JOptionPane.YES_NO_OPTION
+                this,
+                "Eliminar l'arxiu local '" + media.getNombre() + "'?",
+                "Confirmar eliminació",
+                JOptionPane.YES_NO_OPTION
         );
 
         if (confirm == JOptionPane.YES_OPTION) {
-            File file = new File(mf.getPath());
-            if (file.delete()) {
-                JOptionPane.showMessageDialog(this, "Archivo eliminado correctamente.");
+            boolean eliminat = media.getLocalFile().delete();
+
+            if (eliminat) {
+                JOptionPane.showMessageDialog(this,
+                        "Fitxer eliminat correctament.");
             } else {
-                JOptionPane.showMessageDialog(this, "No se pudo eliminar el archivo.");
+                JOptionPane.showMessageDialog(this,
+                        "No s'ha pogut eliminar el fitxer.");
             }
-            loadMediaFiles();
+
+            // Tornar a carregar dades per actualitzar estats
+            carregarDades();
         }
     }
-    // Funcio extra per reproduir un arxiu seleccionat
-    private void playSelectedFile() {
-        int selectedRow = jTable.getSelectedRow();
-        if (selectedRow == -1) {
-            JOptionPane.showMessageDialog(this, "Selecciona un archivo de la tabla para reproducir.");
+
+    /**
+     * Funció per descarregar l'arxiu seleccionat
+     */
+    private void downloadSelectedFile() {
+        if (!validarCarpetaDescarga()) return; // validar carpeta primer
+        int filaSeleccionada = jTable.getSelectedRow();
+        if (filaSeleccionada == -1) return;
+
+        UnifiedMediaModel media = filteredMedia.get(filaSeleccionada);
+        if (media.getRemoteMedia() == null) {
+            JOptionPane.showMessageDialog(this, "Aquest fitxer no existeix remotament.");
             return;
         }
 
-        MediaFileModel mf = filteredFiles.get(selectedRow);
-        File file = new File(mf.getPath());
+        String rutaDescarga = mainFrame.getPreferencesPanel().getDownloadPath();
+        File desti = new File(rutaDescarga, media.getNombre());
 
-        if (!file.exists()) {
-            JOptionPane.showMessageDialog(this, "El archivo no existe o fue movido: " + mf.getPath());
+        try {
+            diComponent.descarregar(media.getRemoteMedia().id, desti);
+            JOptionPane.showMessageDialog(this, "Fitxer descarregat correctament.");
+            carregarDades();
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Error descarregant: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Funció per pujar l'arxiu seleccionat al servidor
+     */
+    private void uploadSelectedFile() {
+        int filaSeleccionada = jTable.getSelectedRow();
+        if (filaSeleccionada == -1) return;
+
+        UnifiedMediaModel media = filteredMedia.get(filaSeleccionada);
+        File fitxerLocal = media.getLocalFile();
+
+        if (fitxerLocal == null || !fitxerLocal.exists()) {
+            JOptionPane.showMessageDialog(this, "El fitxer local no existeix.");
             return;
         }
 
         try {
-            java.awt.Desktop.getDesktop().open(file);
-        } catch (IOException ex) {
-            JOptionPane.showMessageDialog(this, "No se pudo abrir el archivo: " + ex.getMessage());
+            diComponent.pujarFitxer(fitxerLocal, "/"); // "/" o la ruta de destí al servidor
+            JOptionPane.showMessageDialog(this, "Fitxer pujat correctament.");
+            carregarDades();
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Error: " + e.getMessage());
         }
     }
 
-    //Es crea una clase interna per a poder  personalitzar a 100% sa taula
-    private class MediaTableModel extends AbstractTableModel {
-        private List<MediaFileModel> data = new ArrayList<>();
-        private final String[] cols = {"Nombre", "Tamaño", "MIME", "Fecha"};
+    /**
+     * Funció per reproduir un arxiu seleccionat
+     */
+    private void playSelectedFile() {
+        int filaSeleccionada = jTable.getSelectedRow();
+        if (filaSeleccionada == -1) {
+            JOptionPane.showMessageDialog(this,
+                    "Selecciona un fitxer de la taula per reproduir.");
+            return;
+        }
 
-        public void updateData(List<MediaFileModel> newData) {
+        UnifiedMediaModel media = filteredMedia.get(filaSeleccionada);
+
+        // Només es pot reproduir si existeix localment
+        if (media.getLocalFile() == null || !media.getLocalFile().exists()) {
+            JOptionPane.showMessageDialog(this,
+                "Aquest fitxer no existeix localment i no es pot reproduir.");
+            return;
+        }
+
+        try {
+            java.awt.Desktop.getDesktop().open(media.getLocalFile());
+        } catch (IOException ex) {
+            JOptionPane.showMessageDialog(this,
+                "No s'ha pogut obrir el fitxer: " + ex.getMessage());
+        }
+    }
+
+    /**
+     * Classe interna per personalitzar la taula de fitxers
+     */
+    private class MediaTableModel extends AbstractTableModel {
+        private List<UnifiedMediaModel> data = new ArrayList<>();
+        private final String[] cols = { "Nombre", "Tamaño", "MIME", "Fecha", "Estado" };
+
+        // Actualitzar dades de la taula
+        public void updateData(List<UnifiedMediaModel> newData) {
             this.data = new ArrayList<>(newData);
-            fireTableDataChanged();
+            fireTableDataChanged(); // Notificar la taula que ha canviat
         }
 
         @Override public int getRowCount() { return data.size(); }
@@ -210,18 +413,72 @@ public class MediaFilePanel extends javax.swing.JPanel {
         @Override public String getColumnName(int col) { return cols[col]; }
 
         @Override
-        public Object getValueAt(int row, int col) {
-            MediaFileModel mf = data.get(row);
-            return switch (col) {
-                case 0 -> mf.getName();
-                case 1 -> formatSize(mf.getSize());
-                case 2 -> mf.getMimeType();
-                case 3 -> mf.getDate().format(DateTimeFormatter.ofPattern("dd/MM/yy HH:mm"));
-                default -> null;
-            };
+        public Object getValueAt(int fila, int columna) {
+            UnifiedMediaModel media = data.get(fila);
+
+            // Decidir què mostrar segons la columna
+            switch (columna) {
+                case 0:
+                    // Nom
+                    return media.getNombre();
+                case 1:
+                    // Tamany
+                    if (media.getSize() > 0) return formatSize(media.getSize());
+                    else return "";
+                case 2:
+                    // MIME
+                    return media.getMime();
+                case 3:
+                    // Data
+                    if (media.getDate() != null)
+                        return media.getDate().format(DateTimeFormatter.ofPattern("dd/MM/yy HH:mm"));
+                    else return "";
+                case 4:
+                    // Estat
+                    return media.getEstado().name();
+                default:
+                    return null;
+            }
         }
     }
-    
+    //Controla l'error de si no tenim a preferences panel la ruta de la carpeta descarregues
+    private boolean validarCarpetaDescarga() {
+        String rutaDescarga = mainFrame.getPreferencesPanel().getDownloadPath();
+
+        if (rutaDescarga == null || rutaDescarga.isEmpty()) {
+            JOptionPane.showMessageDialog(
+                this,
+                "No se ha definido la carpeta de descarga en Preferencias.",
+                "Carpeta no definida",
+                JOptionPane.WARNING_MESSAGE
+            );
+            return false;
+        }
+
+        File carpeta = new File(rutaDescarga);
+        if (!carpeta.exists()) {
+            boolean creada = carpeta.mkdirs(); // intenta crear la carpeta
+            if (!creada) {
+                JOptionPane.showMessageDialog(
+                    this,
+                    "No se pudo crear la carpeta de descarga: " + rutaDescarga,
+                    "Error de carpeta",
+                    JOptionPane.ERROR_MESSAGE
+                );
+                return false;
+            }
+        } else if (!carpeta.isDirectory()) {
+            JOptionPane.showMessageDialog(
+                this,
+                "La ruta de descarga no es un directorio válido: " + rutaDescarga,
+                "Error de carpeta",
+                JOptionPane.ERROR_MESSAGE
+            );
+            return false;
+        }
+
+        return true;
+    }
     //Funcio que serveix per mostrar es pes de s'arxiu amb un format segons sa mida
     private String formatSize(long bytes) {
         if (bytes < 1024) return bytes + " B";
@@ -317,9 +574,9 @@ public class MediaFilePanel extends javax.swing.JPanel {
         jButtonRefresh.setBounds(250, 80, 90, 23);
 
         jLabel1.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
-        jLabel1.setText("Tipo de archivo:");
+        jLabel1.setText("Estado:");
         add(jLabel1);
-        jLabel1.setBounds(30, 80, 90, 16);
+        jLabel1.setBounds(100, 80, 40, 16);
 
         jButtonPlay.setBackground(new java.awt.Color(204, 255, 204));
         jButtonPlay.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
@@ -339,7 +596,7 @@ public class MediaFilePanel extends javax.swing.JPanel {
     }//GEN-LAST:event_jComboBoxFilterActionPerformed
 
     private void jButtonRefreshActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonRefreshActionPerformed
-        loadMediaFiles();
+        carregarDades();
     }//GEN-LAST:event_jButtonRefreshActionPerformed
 
     private void jButtonDeleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDeleteActionPerformed
@@ -347,7 +604,16 @@ public class MediaFilePanel extends javax.swing.JPanel {
     }//GEN-LAST:event_jButtonDeleteActionPerformed
 
     private void jButtonPlayActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonPlayActionPerformed
-        playSelectedFile();
+        int selectedRow = jTable.getSelectedRow();
+        if (selectedRow == -1) return;
+
+        UnifiedMediaModel media = filteredMedia.get(selectedRow);
+
+        switch (media.getEstado()) {
+            case LOCAL -> uploadSelectedFile();
+            case REMOTO -> downloadSelectedFile();
+            case AMBOS -> playSelectedFile();
+        }
     }//GEN-LAST:event_jButtonPlayActionPerformed
 
 

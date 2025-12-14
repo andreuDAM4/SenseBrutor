@@ -1,7 +1,7 @@
 package anglada.sensebrutor.vista;
 
+import anglada.dimedianetpollingcomponent.DIMediaNetPollingComponent;
 import anglada.sensebrutor.SenseBrutor;
-import anglada.sensebrutor.model.ApiClient;
 
 import javax.swing.*;
 import java.awt.*;
@@ -14,7 +14,7 @@ import java.awt.*;
 public class LoginPanel extends JPanel {
 
     private final SenseBrutor main;
-    private final ApiClient apiClient;
+    private final DIMediaNetPollingComponent component;
 
     private JTextField emailField;
     private JPasswordField passwordField;
@@ -22,10 +22,9 @@ public class LoginPanel extends JPanel {
     private JButton loginButton;
     private JLabel statusLabel;
 
-    public LoginPanel(SenseBrutor main, ApiClient apiClient) {
+    public LoginPanel(SenseBrutor main) {
         this.main = main;
-        this.apiClient = apiClient;
-        //Inicialitza l'interfaz
+        this.component = main.getDiMediaPolling();
         initUI();
     }
 
@@ -85,7 +84,7 @@ public class LoginPanel extends JPanel {
         //Utilitzam thread apres a l'assignatura PSP per fer llamada a API for des fil de UI
         new Thread(() -> {
             try {
-                String token = apiClient.login(email, password);
+                String token = component.login(email, password);
                 //Es guarda token a un fitxer
                 if (rememberCheck.isSelected()) {
                     main.guardarSesion(token);
@@ -95,6 +94,7 @@ public class LoginPanel extends JPanel {
 
                 // Guardar jwt dins main
                 main.jwt = token;
+                component.setRunning(true); // activa polling
                 //Actualitzar UI
                 SwingUtilities.invokeLater(() -> {
                     statusLabel.setForeground(new Color(0, 130, 0));

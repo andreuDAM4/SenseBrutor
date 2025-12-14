@@ -8,6 +8,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 
 /**
@@ -135,141 +136,154 @@ public class DownloadPanel extends javax.swing.JPanel {
         return null;
     }
     
-    /*Accio del boto descarregar, inclou progresbar i quan troba " " una vegada a finalitzat asigna la variable downloadedFilePath.
-    downloadedFilePath serveix per una vegada descarregat obrir l'arxiu al reproductor predeterminat*/
     /**
-     * Codi adaptat downloadVideo.java de Miguel Oscar García
-     */
-    private void iniciarDescarga(String ytdlpPath, String url, String formatCode, String downloadPath, int maxVelocity) {
-        jProgressBarDownload.setVisible(true);
-        jProgressBarDownload.setValue(0);
-        jLabelProgress.setText("0%");
+    * Acció del botó descarregar: inclou barra de progrés i assigna downloadedFilePath
+    * un cop finalitzat, per poder reproduir el fitxer descarregat.
+    */
+   private void iniciarDescarga(String ytdlpPath, String url, String formatCode, String downloadPath, int maxVelocity) {
+       jProgressBarDownload.setVisible(true);
+       jProgressBarDownload.setValue(0);
+       jLabelProgress.setText("0%");
 
-        SwingWorker<Void, Integer> worker = new SwingWorker<>() {
-            boolean formatError = false;
-            boolean yaExiste = false;
-            @Override
-            protected Void doInBackground() throws Exception {
-                ProcessBuilder pb = new ProcessBuilder(
-                        ytdlpPath,
-                        "--newline",
-                        "--restrict-filenames",
-                        "-f", formatCode,
-                        "-o", downloadPath + File.separator + "%(title)s.%(ext)s",
-                        url
-                );
-                
-                //Velocitat máxima
-                if (maxVelocity > 0) {
-                    pb.command().add("--limit-rate");
-                    pb.command().add(maxVelocity + "K");
-                }
+       SwingWorker<Void, Integer> worker = new SwingWorker<>() {
+           boolean yaExiste = false;
+           String formatoActual = formatCode;
+           String downloadedFilePathTemp = null;
+           final int maxIntents = 5;
 
-                pb.redirectErrorStream(true);
-                Process process = pb.start();
-                BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-                String line;
-                String lastLineWithQuotes = null;
-                Boolean fixedUp = false;
-                while ((line = reader.readLine()) != null) {
-                    System.out.println(line);
-                    Integer percent = parsePercentage(line);
-                    if (percent != null) publish(percent);
-                    
-                    // Agregat per si surt error hora de descargar per format inexistent
-                    if (line.contains("ERROR:")) {
-                        formatError = true;
-                    }
-                    //Mostrar mensatge dient que s'arxiu ja existeix
-                    if (line.contains("has already been downloaded")) {
-                        yaExiste = true;
-                    }
-                    
-                    // Guardar la última línea que te comilles
-                    if (line.contains("\"")) {
-                        lastLineWithQuotes = line;
-                    }
-                    
-                    //En cas de seleccionar M3U guardam ruta
-                    if (line.startsWith("[FixupM3u8]")){
-                        int idx = line.indexOf("\"");
-                        int lastIdx = line.lastIndexOf("\"");
-                        if (idx >= 0 && lastIdx > idx) {
-                            downloadedFilePath = line.substring(idx + 1, lastIdx);
-                            fixedUp = true;
-                        }
-                    }
-                }
-                
-                if (lastLineWithQuotes != null && fixedUp == false) {
-                    int idx = lastLineWithQuotes.indexOf("\"");
-                    int lastIdx = lastLineWithQuotes.lastIndexOf("\"");
-                    if (idx >= 0 && lastIdx > idx) {
-                        downloadedFilePath = lastLineWithQuotes.substring(idx + 1, lastIdx);
-                    }
-                }
+           @Override
+           protected Void doInBackground() throws Exception {
+               boolean descargaExitosa = false;
+               int intents = 0;
 
-                process.waitFor();
-                publish(100); // asegurar 100%
-                return null;
-            }
+               while (!descargaExitosa && intents < maxIntents) {
+                   intents++;
 
-            @Override
-            protected void process(java.util.List<Integer> chunks) {
-                int last = chunks.get(chunks.size() - 1);
-                jProgressBarDownload.setValue(last);
-                jLabelProgress.setText(last + "%");
-            }
+                   // Reiniciar barra de progrés al començament de l'intent
+                   SwingUtilities.invokeLater(() -> {
+                       jProgressBarDownload.setVisible(true);
+                       jProgressBarDownload.setValue(0);
+                       jLabelProgress.setText("0%");
+                   });
 
-            @Override
-            protected void done() {
-                if (formatError) {
-                    JOptionPane.showMessageDialog(
-                        DownloadPanel.this,
-                        "El formato seleccionado no está disponible.",
-                        "Formato no disponible",
-                        JOptionPane.WARNING_MESSAGE
-                    );
-                    return;
-                }
-                if (yaExiste) {
-                    JOptionPane.showMessageDialog(
-                        DownloadPanel.this,
-                        "El archivo ya existe.",
-                        "El archivo ya existe.",
-                        JOptionPane.WARNING_MESSAGE
-                    );
-                    return;
-                }
-                if (downloadedFilePath != null && new File(downloadedFilePath).exists()) {
-                    jButtonPlay.setVisible(true);
-                    mainFrame.getMediaFilePanel().reloadIfConfigured();
-                
-                    PreferencesPanel prefs = mainFrame.getPreferencesPanel();
-                    if (prefs.isCreateM3U()) {
-                        try {
-                            File downloadedFile = new File(downloadedFilePath);
-                            File folder = downloadedFile.getParentFile();
-                            File m3uFile = new File(folder, "playlist.m3u");
+                   ProcessBuilder pb = new ProcessBuilder(
+                           ytdlpPath,
+                           "--newline",
+                           "--restrict-filenames",
+                           "-f", formatoActual,
+                           "-o", downloadPath + File.separator + "%(title)s.%(ext)s",
+                           url
+                   );
 
-                            // Añadir el archivo descargado a la lista (modo append = true)
-                            try (FileWriter fw = new FileWriter(m3uFile, true)) {
-                                fw.write(downloadedFile.getAbsolutePath() + "\n");
-                            }
+                   if (maxVelocity > 0) {
+                       pb.command().add("--limit-rate");
+                       pb.command().add(maxVelocity + "K");
+                   }
 
-                            System.out.println("Archivo M3U actualizado: " + m3uFile.getAbsolutePath());
-                        } catch (IOException ex) {
-                            System.err.println("Error al crear archivo M3U: " + ex.getMessage());
-                        }
-                    }
-                } else {
-                    System.out.println("Archivo final no encontrado: " + downloadedFilePath);
-                }
-            }
-        };
+                   pb.redirectErrorStream(true);
+                   Process process = pb.start();
+                   BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
 
-        worker.execute();
-    }
+                   String line;
+                   String lastLineWithQuotes = null;
+                   boolean fixedUp = false;
+                   boolean formatError = false; // reiniciem cada intent
+                   yaExiste = false;
+
+                   while ((line = reader.readLine()) != null) {
+                       System.out.println(line);
+
+                       Integer percent = parsePercentage(line);
+                       if (percent != null) publish(percent);
+
+                       if (line.contains("ERROR:")) formatError = true;
+                       if (line.contains("has already been downloaded")) yaExiste = true;
+
+                       if (line.contains("\"")) lastLineWithQuotes = line;
+
+                       if (line.startsWith("[FixupM3u8]")) {
+                           int idx = line.indexOf("\"");
+                           int lastIdx = line.lastIndexOf("\"");
+                           if (idx >= 0 && lastIdx > idx) {
+                               downloadedFilePathTemp = line.substring(idx + 1, lastIdx);
+                               fixedUp = true;
+                           }
+                       }
+                   }
+
+                   if (lastLineWithQuotes != null && !fixedUp) {
+                       int idx = lastLineWithQuotes.indexOf("\"");
+                       int lastIdx = lastLineWithQuotes.lastIndexOf("\"");
+                       if (idx >= 0 && lastIdx > idx) {
+                           downloadedFilePathTemp = lastLineWithQuotes.substring(idx + 1, lastIdx);
+                       }
+                   }
+
+                   process.waitFor();
+                   publish(100);
+
+                   // Si hi ha error de format i encara queden intents, provar format alternatiu
+                   if (formatError && intents < maxIntents) {
+                       System.out.println("Error amb format " + formatoActual + ", intentant amb format alternatiu...");
+                       formatoActual = "best";
+                   } else {
+                       descargaExitosa = true;
+                   }
+               }
+
+               return null;
+           }
+
+           @Override
+           protected void process(java.util.List<Integer> chunks) {
+               int last = chunks.get(chunks.size() - 1);
+               jProgressBarDownload.setValue(last);
+               jLabelProgress.setText(last + "%");
+           }
+
+           @Override
+           protected void done() {
+               if (yaExiste) {
+                   JOptionPane.showMessageDialog(
+                           DownloadPanel.this,
+                           "El archivo ya existe.",
+                           "Archivo existente",
+                           JOptionPane.WARNING_MESSAGE
+                   );
+                   return;
+               }
+
+               if (downloadedFilePathTemp != null && new File(downloadedFilePathTemp).exists()) {
+                   downloadedFilePath = downloadedFilePathTemp;
+                   jButtonPlay.setVisible(true);
+                   mainFrame.getMediaFilePanel().reloadIfConfigured();
+
+                   if (mainFrame.getPreferencesPanel().isCreateM3U()) {
+                       try {
+                           File downloadedFile = new File(downloadedFilePath);
+                           File folder = downloadedFile.getParentFile();
+                           File m3uFile = new File(folder, "playlist.m3u");
+
+                           try (FileWriter fw = new FileWriter(m3uFile, true)) {
+                               fw.write(downloadedFile.getAbsolutePath() + "\n");
+                           }
+
+                           System.out.println("Archivo M3U actualizado: " + m3uFile.getAbsolutePath());
+                       } catch (IOException ex) {
+                           System.err.println("Error al crear archivo M3U: " + ex.getMessage());
+                       }
+                   }
+               } else {
+                   System.out.println("Archivo final no encontrado: " + downloadedFilePathTemp);
+               }
+           }
+       };
+
+       worker.execute();
+   }
+
+
+
     
     private void jButtonDownloadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDownloadActionPerformed
         PreferencesPanel prefs = mainFrame.getPreferencesPanel();
