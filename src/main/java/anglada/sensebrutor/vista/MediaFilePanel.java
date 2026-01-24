@@ -503,7 +503,6 @@ public class MediaFilePanel extends javax.swing.JPanel {
         jTable = new javax.swing.JTable();
         jButtonDelete = new javax.swing.JButton();
         jButtonRefresh = new javax.swing.JButton();
-        jLabel1 = new javax.swing.JLabel();
         jButtonPlay = new javax.swing.JButton();
 
         setName("MediaFilePanel"); // NOI18N
@@ -517,7 +516,7 @@ public class MediaFilePanel extends javax.swing.JPanel {
         jLabelBuscar.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jLabelBuscar.setText("Buscar por nombre:");
         add(jLabelBuscar);
-        jLabelBuscar.setBounds(30, 50, 110, 16);
+        jLabelBuscar.setBounds(20, 50, 110, 16);
 
         jTextFieldBuscar.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jTextFieldBuscar.setToolTipText("Buscar por nombre...");
@@ -530,12 +529,12 @@ public class MediaFilePanel extends javax.swing.JPanel {
             }
         });
         add(jComboBoxFilter);
-        jComboBoxFilter.setBounds(150, 80, 100, 20);
+        jComboBoxFilter.setBounds(20, 80, 120, 20);
 
         jScrollPaneMimeTypes.setViewportView(jListMimeTypes);
 
         add(jScrollPaneMimeTypes);
-        jScrollPaneMimeTypes.setBounds(30, 110, 110, 160);
+        jScrollPaneMimeTypes.setBounds(20, 110, 120, 160);
 
         jTable.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -548,7 +547,7 @@ public class MediaFilePanel extends javax.swing.JPanel {
         jScrollPaneTable.setViewportView(jTable);
 
         add(jScrollPaneTable);
-        jScrollPaneTable.setBounds(140, 110, 380, 160);
+        jScrollPaneTable.setBounds(150, 110, 370, 160);
 
         jButtonDelete.setBackground(new java.awt.Color(255, 204, 204));
         jButtonDelete.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
@@ -570,12 +569,7 @@ public class MediaFilePanel extends javax.swing.JPanel {
             }
         });
         add(jButtonRefresh);
-        jButtonRefresh.setBounds(250, 80, 90, 23);
-
-        jLabel1.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
-        jLabel1.setText("Estado:");
-        add(jLabel1);
-        jLabel1.setBounds(100, 80, 40, 16);
+        jButtonRefresh.setBounds(150, 80, 90, 23);
 
         jButtonPlay.setBackground(new java.awt.Color(204, 255, 204));
         jButtonPlay.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
@@ -587,7 +581,7 @@ public class MediaFilePanel extends javax.swing.JPanel {
             }
         });
         add(jButtonPlay);
-        jButtonPlay.setBounds(340, 80, 100, 23);
+        jButtonPlay.setBounds(280, 80, 100, 23);
     }// </editor-fold>//GEN-END:initComponents
 
     private void jComboBoxFilterActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBoxFilterActionPerformed
@@ -621,7 +615,6 @@ public class MediaFilePanel extends javax.swing.JPanel {
     private javax.swing.JButton jButtonPlay;
     private javax.swing.JButton jButtonRefresh;
     private javax.swing.JComboBox<String> jComboBoxFilter;
-    private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabelBuscar;
     private javax.swing.JLabel jLabelTitle;
     private javax.swing.JList<String> jListMimeTypes;
