@@ -31,41 +31,41 @@ public class LoginPanel extends JPanel {
     private void initUI() {
         setLayout(null);
         setBackground(new Color(240, 240, 240));
-        setBounds(0, 0, 1050, 340);
+        setBounds(0, 0, 550, 340);
 
         JLabel title = new JLabel("Iniciar sesión");
         title.setFont(new Font("Arial", Font.BOLD, 22));
-        title.setBounds(490, 20, 300, 40);
+        title.setBounds(205, 20, 300, 40);
         add(title);
 
         JLabel lblMail = new JLabel("Email:");
-        lblMail.setBounds(385, 80, 100, 25);
+        lblMail.setBounds(100, 80, 100, 25);
         add(lblMail);
 
         emailField = new JTextField();
-        emailField.setBounds(430, 80, 250, 25);
+        emailField.setBounds(150, 80, 250, 25);
         add(emailField);
 
         JLabel lblPass = new JLabel("Contraseña:");
-        lblPass.setBounds(350, 120, 100, 25);
+        lblPass.setBounds(70, 120, 100, 25);
         add(lblPass);
 
         passwordField = new JPasswordField();
-        passwordField.setBounds(430, 120, 250, 25);
+        passwordField.setBounds(150, 120, 250, 25);
         add(passwordField);
 
         rememberCheck = new JCheckBox("Recordarme");
-        rememberCheck.setBounds(430, 155, 150, 25);
+        rememberCheck.setBounds(210, 155, 150, 25);
         add(rememberCheck);
 
         loginButton = new JButton("Entrar");
-        loginButton.setBounds(430, 195, 250, 30);
+        loginButton.setBounds(150, 195, 250, 30);
         loginButton.addActionListener(e -> intentarLogin());
         add(loginButton);
 
         statusLabel = new JLabel("", SwingConstants.CENTER);
         statusLabel.setForeground(Color.RED);
-        statusLabel.setBounds(350, 230, 400, 30);
+        statusLabel.setBounds(50, 230, 400, 30);
         add(statusLabel);
     }
 

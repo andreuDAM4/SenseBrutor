@@ -37,7 +37,7 @@ public final class SenseBrutor extends javax.swing.JFrame {
         mediaFilePanel = new MediaFilePanel(this);
         loginPanel = new LoginPanel(this);
         
-        JMenuItem logoutItem = new JMenuItem("Cerrar sesión");
+        /*JMenuItem logoutItem = new JMenuItem("Cerrar sesión");
         logoutItem.addActionListener(e -> {
             borrarSesion();   // borra archivo
             this.jwt = "";    // borra token en memoria
@@ -45,19 +45,20 @@ public final class SenseBrutor extends javax.swing.JFrame {
             preferencesPanel.reiniciar(); // neteja configuració
             mostrarLogin();
         });
-        jMenuFile.insert(logoutItem, 0);
+        jMenuFile.insert(logoutItem, 0);*/
 
         downloadpanel.setBounds(0, 0, 500, 340);
-        mediaFilePanel.setBounds(500, 0, 550, 340);
-        preferencesPanel.setBounds(0, 0, 500, 340);
-        loginPanel.setBounds(0, 0, 1050, 340);
+        mediaFilePanel.setBounds(0, 0, 550, 340);
+        //mediaFilePanel.setBounds(500, 0, 550, 340);
+        preferencesPanel.setBounds(0, 0, 500, 400);
+        loginPanel.setBounds(0, 0, 500, 340);
 
         getContentPane().add(downloadpanel);
         getContentPane().add(mediaFilePanel);
         getContentPane().add(preferencesPanel);
         getContentPane().add(loginPanel);
         setLayout(null);
-        setSize(1050, 340);
+        setSize(550, 340);
         setLocationRelativeTo(null);
         setResizable(false);
         
@@ -120,7 +121,7 @@ public final class SenseBrutor extends javax.swing.JFrame {
     public void loginCorrecto() {
         loginPanel.setVisible(false);
         downloadpanel.setVisible(true);
-        mediaFilePanel.setVisible(true);
+        mediaFilePanel.setVisible(false);
         preferencesPanel.setVisible(false);
         jMenuItemPreferences.setEnabled(true);
 
@@ -153,7 +154,11 @@ public final class SenseBrutor extends javax.swing.JFrame {
         diMediaPolling = new anglada.dimedianetpollingcomponent.DIMediaNetPollingComponent();
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenuFile = new javax.swing.JMenu();
+        jMenuItemDownload = new javax.swing.JMenuItem();
+        jMenuItemLogout = new javax.swing.JMenuItem();
         jMenuItemExit = new javax.swing.JMenuItem();
+        jMenuServidor = new javax.swing.JMenu();
+        jMenuItemServidor = new javax.swing.JMenuItem();
         jMenuEdit = new javax.swing.JMenu();
         jMenuItemPreferences = new javax.swing.JMenuItem();
         JMenuHelp = new javax.swing.JMenu();
@@ -176,6 +181,22 @@ public final class SenseBrutor extends javax.swing.JFrame {
 
         jMenuFile.setText("Archivo");
 
+        jMenuItemDownload.setText("Descargar");
+        jMenuItemDownload.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItemDownloadActionPerformed(evt);
+            }
+        });
+        jMenuFile.add(jMenuItemDownload);
+
+        jMenuItemLogout.setText("Cerrar Sesión");
+        jMenuItemLogout.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItemLogoutActionPerformed(evt);
+            }
+        });
+        jMenuFile.add(jMenuItemLogout);
+
         jMenuItemExit.setText("Salir");
         jMenuItemExit.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -185,6 +206,18 @@ public final class SenseBrutor extends javax.swing.JFrame {
         jMenuFile.add(jMenuItemExit);
 
         jMenuBar1.add(jMenuFile);
+
+        jMenuServidor.setText("Servidor");
+
+        jMenuItemServidor.setText("Local / Remoto");
+        jMenuItemServidor.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItemServidorActionPerformed(evt);
+            }
+        });
+        jMenuServidor.add(jMenuItemServidor);
+
+        jMenuBar1.add(jMenuServidor);
 
         jMenuEdit.setText("Editar");
 
@@ -222,7 +255,7 @@ public final class SenseBrutor extends javax.swing.JFrame {
     private void jMenuItemPreferencesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemPreferencesActionPerformed
         downloadpanel.setVisible(false);
         preferencesPanel.setVisible(true);
-        
+        mediaFilePanel.setVisible(false);
     }//GEN-LAST:event_jMenuItemPreferencesActionPerformed
 
     private void jMenuItemAboutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemAboutActionPerformed
@@ -231,6 +264,26 @@ public final class SenseBrutor extends javax.swing.JFrame {
         jDialogAbout.setLocationRelativeTo(this);
         jDialogAbout.setVisible(true);
     }//GEN-LAST:event_jMenuItemAboutActionPerformed
+
+    private void jMenuItemServidorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemServidorActionPerformed
+        downloadpanel.setVisible(false);
+        preferencesPanel.setVisible(false);
+        mediaFilePanel.setVisible(true);
+    }//GEN-LAST:event_jMenuItemServidorActionPerformed
+
+    private void jMenuItemDownloadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemDownloadActionPerformed
+        downloadpanel.setVisible(true);
+        preferencesPanel.setVisible(false);
+        mediaFilePanel.setVisible(false);
+    }//GEN-LAST:event_jMenuItemDownloadActionPerformed
+
+    private void jMenuItemLogoutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemLogoutActionPerformed
+        borrarSesion();   // borra archivo
+        this.jwt = "";    // borra token en memoria
+        loginPanel.limpiar();
+        preferencesPanel.reiniciar(); // neteja configuració
+        mostrarLogin();
+    }//GEN-LAST:event_jMenuItemLogoutActionPerformed
 
     /**
      * @param args the command line arguments
@@ -251,7 +304,11 @@ public final class SenseBrutor extends javax.swing.JFrame {
     private javax.swing.JMenu jMenuEdit;
     private javax.swing.JMenu jMenuFile;
     private javax.swing.JMenuItem jMenuItemAbout;
+    private javax.swing.JMenuItem jMenuItemDownload;
     private javax.swing.JMenuItem jMenuItemExit;
+    private javax.swing.JMenuItem jMenuItemLogout;
     private javax.swing.JMenuItem jMenuItemPreferences;
+    private javax.swing.JMenuItem jMenuItemServidor;
+    private javax.swing.JMenu jMenuServidor;
     // End of variables declaration//GEN-END:variables
 }

@@ -73,7 +73,6 @@ public class PreferencesPanel extends javax.swing.JPanel {
         jLabelPathYTDLP = new javax.swing.JLabel();
         jButtonPathYTDLP = new javax.swing.JButton();
         jTextFieldPathYTDLP = new javax.swing.JTextField();
-        jButton1 = new javax.swing.JButton();
 
         jFileChooserGeneral.setApproveButtonText("Seleccionar");
         jFileChooserGeneral.setDialogTitle("Selecciona una carpeta para guardar");
@@ -127,16 +126,6 @@ public class PreferencesPanel extends javax.swing.JPanel {
         jButtonPathYTDLP.setBounds(50, 180, 160, 23);
         add(jTextFieldPathYTDLP);
         jTextFieldPathYTDLP.setBounds(220, 180, 290, 22);
-
-        jButton1.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
-        jButton1.setText("!DESCARGAR YA!");
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
-            }
-        });
-        add(jButton1);
-        jButton1.setBounds(160, 230, 260, 23);
     }// </editor-fold>//GEN-END:initComponents
     
     //FileChooser que permet navegar i seleccionar una ruta directori
@@ -168,13 +157,8 @@ public class PreferencesPanel extends javax.swing.JPanel {
         }
     }//GEN-LAST:event_jButtonPathYTDLPActionPerformed
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        mainFrame.mostrarDownloadPanel();
-    }//GEN-LAST:event_jButton1ActionPerformed
-
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButton1;
     private javax.swing.JButton jButtonDownloadPath;
     private javax.swing.JButton jButtonPathYTDLP;
     private javax.swing.JCheckBox jCheckBoxM3u;
