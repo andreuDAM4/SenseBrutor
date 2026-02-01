@@ -61,12 +61,12 @@
         </Menu>
         <Menu class="javax.swing.JMenu" name="jMenuServidor">
           <Properties>
-            <Property name="text" type="java.lang.String" value="Servidor"/>
+            <Property name="text" type="java.lang.String" value="Medios"/>
           </Properties>
           <SubComponents>
             <MenuItem class="javax.swing.JMenuItem" name="jMenuItemServidor">
               <Properties>
-                <Property name="text" type="java.lang.String" value="Local / Remoto"/>
+                <Property name="text" type="java.lang.String" value="Biblioteca de Medios"/>
               </Properties>
               <Events>
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jMenuItemServidorActionPerformed"/>

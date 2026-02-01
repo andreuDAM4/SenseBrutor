@@ -14,7 +14,7 @@ import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.table.AbstractTableModel;
-import java.time.format.DateTimeFormatter;;
+import java.time.format.DateTimeFormatter;
 
 /**
  * Panel sempre visible que mostra els arxius de dins una carpeta on aniran les descargues.
@@ -40,7 +40,7 @@ public class MediaFilePanel extends javax.swing.JPanel {
         initComponents();
         allMedia = new ArrayList<>();
         filteredMedia = new ArrayList<>();
-
+        jProgressBar.setVisible(false); 
         setupModels();
         setupListeners();
         // Afegim un listener al polling per actualitzar la taula automàticament
@@ -78,6 +78,13 @@ public class MediaFilePanel extends javax.swing.JPanel {
         filterModel.addElement("Remoto");
         filterModel.addElement("Ambos");
         jComboBoxFilter.setModel(filterModel);
+        // Columna 4 es "Estado"
+        // Aplicar el renderer a TODAS las columnas para que toda la fila se pinte
+        for (int i = 0; i < jTable.getColumnCount(); i++) {
+            jTable.getColumnModel().getColumn(i).setCellRenderer(new EstadoRenderer());
+        }
+        jButtonPlay.setContentAreaFilled(true);
+        jButtonPlay.setOpaque(true);
     }
     
     
@@ -115,16 +122,22 @@ public class MediaFilePanel extends javax.swing.JPanel {
                         jButtonPlay.setText("Subir");
                         jButtonPlay.setEnabled(true);
                         jButtonDelete.setEnabled(true);
+                        jButtonPlay.setBackground(new java.awt.Color(255, 165, 0)); 
+                        jButtonPlay.setForeground(java.awt.Color.BLACK);
                     }
                     case REMOTO -> {
                         jButtonPlay.setText("Descargar");
                         jButtonPlay.setEnabled(true);
                         jButtonDelete.setEnabled(false);
+                        jButtonPlay.setBackground(new java.awt.Color(173, 216, 230));
+                        jButtonPlay.setForeground(java.awt.Color.BLACK);
                     }
                     case AMBOS -> {
                         jButtonPlay.setText("Reproducir");
                         jButtonPlay.setEnabled(true);
                         jButtonDelete.setEnabled(true);
+                        jButtonPlay.setBackground(new java.awt.Color(204, 255, 204));
+                        jButtonPlay.setForeground(java.awt.Color.BLACK);
                     }
                 }
             }
@@ -229,7 +242,7 @@ public class MediaFilePanel extends javax.swing.JPanel {
             }
         } catch (Exception e) {
             // Pot passar si no hi ha carpeta local o fallada de xarxa; no crític
-            System.err.println("Avís xarxa (no crític): " + e.getMessage());
+            System.err.println("Avíso de red (no crítico): " + e.getMessage());
         }
 
         //Afegir tots els arxius del mapa a la llista principal
@@ -280,7 +293,7 @@ public class MediaFilePanel extends javax.swing.JPanel {
         int filaSeleccionada = jTable.getSelectedRow();
         if (filaSeleccionada == -1) {
             JOptionPane.showMessageDialog(this,
-                    "Selecciona un fitxer de la taula per eliminar.");
+                    "Selecciona un archivo de la tabla para eliminar.");
             return;
         }
 
@@ -289,14 +302,13 @@ public class MediaFilePanel extends javax.swing.JPanel {
         // No existeix localment
         if (media.getLocalFile() == null || !media.getLocalFile().exists()) {
             JOptionPane.showMessageDialog(this,
-                    "Aquest fitxer no existeix localment.");
+                    "Este archivo no existe localmente.");
             return;
         }
 
         int confirm = JOptionPane.showConfirmDialog(
                 this,
-                "Eliminar l'arxiu local '" + media.getNombre() + "'?",
-                "Confirmar eliminació",
+                "¿Eliminar el archivo local '" + media.getNombre() + "'?", "Confirmar eliminación",
                 JOptionPane.YES_NO_OPTION
         );
 
@@ -305,10 +317,10 @@ public class MediaFilePanel extends javax.swing.JPanel {
 
             if (eliminat) {
                 JOptionPane.showMessageDialog(this,
-                        "Fitxer eliminat correctament.");
+                        "Archivo eliminado correctamente.");
             } else {
                 JOptionPane.showMessageDialog(this,
-                        "No s'ha pogut eliminar el fitxer.");
+                        "No se ha podido eliminar el archivo.");
             }
 
             // Tornar a carregar dades per actualitzar estats
@@ -320,26 +332,45 @@ public class MediaFilePanel extends javax.swing.JPanel {
      * Funció per descarregar l'arxiu seleccionat
      */
     private void downloadSelectedFile() {
-        if (!validarCarpetaDescarga()) return; // validar carpeta primer
+        if (!validarCarpetaDescarga()) return;
         int filaSeleccionada = jTable.getSelectedRow();
         if (filaSeleccionada == -1) return;
 
         UnifiedMediaModel media = filteredMedia.get(filaSeleccionada);
-        if (media.getRemoteMedia() == null) {
-            JOptionPane.showMessageDialog(this, "Aquest fitxer no existeix remotament.");
-            return;
-        }
 
-        String rutaDescarga = mainFrame.getPreferencesPanel().getDownloadPath();
-        File desti = new File(rutaDescarga, media.getNombre());
+        toggleLoading(true); // Solo pasamos el boolean
 
-        try {
-            diComponent.descarregar(media.getRemoteMedia().id, desti);
-            JOptionPane.showMessageDialog(this, "Fitxer descarregat correctament.");
-            carregarDades();
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Error descarregant: " + e.getMessage());
-        }
+        new Thread(() -> {
+            try {
+                String rutaDescarga = mainFrame.getPreferencesPanel().getDownloadPath();
+                File desti = new File(rutaDescarga, media.getNombre());
+
+                diComponent.descarregar(media.getRemoteMedia().id, desti);
+
+                SwingUtilities.invokeLater(() -> {
+                    toggleLoading(false);
+                    JOptionPane.showMessageDialog(this, "Archivo '" + media.getNombre() + "' descargado con éxito.");
+                    carregarDades(); 
+                });
+            } catch (Exception e) {
+                SwingUtilities.invokeLater(() -> {
+                    toggleLoading(false);
+                    JOptionPane.showMessageDialog(this, "Error en la descarga: " + e.getMessage());
+                });
+            }
+        }).start();
+    }
+    private void toggleLoading(boolean active) {
+        SwingUtilities.invokeLater(() -> {
+            jProgressBar.setVisible(active);
+            jProgressBar.setIndeterminate(active);
+
+            // Deshabilitamos controles para evitar clicks accidentales durante la operación
+            jButtonPlay.setEnabled(!active);
+            jButtonDelete.setEnabled(!active);
+            jButtonRefresh.setEnabled(!active);
+            jTable.setEnabled(!active);
+        });
     }
 
     /**
@@ -353,17 +384,28 @@ public class MediaFilePanel extends javax.swing.JPanel {
         File fitxerLocal = media.getLocalFile();
 
         if (fitxerLocal == null || !fitxerLocal.exists()) {
-            JOptionPane.showMessageDialog(this, "El fitxer local no existeix.");
+            JOptionPane.showMessageDialog(this, "El archivo local no existe.");
             return;
         }
 
-        try {
-            diComponent.pujarFitxer(fitxerLocal, "/"); // "/" o la ruta de destí al servidor
-            JOptionPane.showMessageDialog(this, "Fitxer pujat correctament.");
-            carregarDades();
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Error: " + e.getMessage());
-        }
+        toggleLoading(true); // Activa la barra
+
+        new Thread(() -> {
+            try {
+                diComponent.pujarFitxer(fitxerLocal, "/");
+
+                SwingUtilities.invokeLater(() -> {
+                    toggleLoading(false); // Apaga la barra
+                    JOptionPane.showMessageDialog(this, "Archivo '" + media.getNombre() + "' subido correctamente.");
+                    carregarDades();
+                });
+            } catch (Exception e) {
+                SwingUtilities.invokeLater(() -> {
+                    toggleLoading(false);
+                    JOptionPane.showMessageDialog(this, "Error en la subida: " + e.getMessage());
+                });
+            }
+        }).start();
     }
 
     /**
@@ -373,7 +415,7 @@ public class MediaFilePanel extends javax.swing.JPanel {
         int filaSeleccionada = jTable.getSelectedRow();
         if (filaSeleccionada == -1) {
             JOptionPane.showMessageDialog(this,
-                    "Selecciona un fitxer de la taula per reproduir.");
+                    "Selecciona un archivo de la tabla para reproducir.");
             return;
         }
 
@@ -382,7 +424,7 @@ public class MediaFilePanel extends javax.swing.JPanel {
         // Només es pot reproduir si existeix localment
         if (media.getLocalFile() == null || !media.getLocalFile().exists()) {
             JOptionPane.showMessageDialog(this,
-                "Aquest fitxer no existeix localment i no es pot reproduir.");
+                "Este archivo no existe localmente y no se puede reproducir.");
             return;
         }
 
@@ -390,7 +432,7 @@ public class MediaFilePanel extends javax.swing.JPanel {
             java.awt.Desktop.getDesktop().open(media.getLocalFile());
         } catch (IOException ex) {
             JOptionPane.showMessageDialog(this,
-                "No s'ha pogut obrir el fitxer: " + ex.getMessage());
+                "No se ha podido abrir el archivo: " + ex.getMessage());
         }
     }
 
@@ -504,14 +546,16 @@ public class MediaFilePanel extends javax.swing.JPanel {
         jButtonDelete = new javax.swing.JButton();
         jButtonRefresh = new javax.swing.JButton();
         jButtonPlay = new javax.swing.JButton();
+        jProgressBar = new javax.swing.JProgressBar();
 
         setName("MediaFilePanel"); // NOI18N
         setLayout(null);
 
-        jLabelTitle.setFont(new java.awt.Font("Consolas", 1, 24)); // NOI18N
+        jLabelTitle.setFont(new java.awt.Font("Segoe UI", 1, 32)); // NOI18N
+        jLabelTitle.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/multimedia.png"))); // NOI18N
         jLabelTitle.setText("Biblioteca de Medios");
         add(jLabelTitle);
-        jLabelTitle.setBounds(140, 10, 280, 40);
+        jLabelTitle.setBounds(80, 0, 400, 40);
 
         jLabelBuscar.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jLabelBuscar.setText("Buscar por nombre:");
@@ -523,6 +567,7 @@ public class MediaFilePanel extends javax.swing.JPanel {
         add(jTextFieldBuscar);
         jTextFieldBuscar.setBounds(150, 50, 370, 22);
 
+        jComboBoxFilter.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         jComboBoxFilter.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jComboBoxFilterActionPerformed(evt);
@@ -531,10 +576,11 @@ public class MediaFilePanel extends javax.swing.JPanel {
         add(jComboBoxFilter);
         jComboBoxFilter.setBounds(20, 80, 120, 20);
 
+        jListMimeTypes.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         jScrollPaneMimeTypes.setViewportView(jListMimeTypes);
 
         add(jScrollPaneMimeTypes);
-        jScrollPaneMimeTypes.setBounds(20, 110, 120, 160);
+        jScrollPaneMimeTypes.setBounds(20, 110, 120, 220);
 
         jTable.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -547,11 +593,12 @@ public class MediaFilePanel extends javax.swing.JPanel {
         jScrollPaneTable.setViewportView(jTable);
 
         add(jScrollPaneTable);
-        jScrollPaneTable.setBounds(150, 110, 370, 160);
+        jScrollPaneTable.setBounds(150, 110, 370, 220);
 
         jButtonDelete.setBackground(new java.awt.Color(255, 204, 204));
         jButtonDelete.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jButtonDelete.setText("Eliminar");
+        jButtonDelete.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         jButtonDelete.setEnabled(false);
         jButtonDelete.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -563,6 +610,7 @@ public class MediaFilePanel extends javax.swing.JPanel {
 
         jButtonRefresh.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jButtonRefresh.setText("Actualizar");
+        jButtonRefresh.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         jButtonRefresh.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButtonRefreshActionPerformed(evt);
@@ -574,6 +622,7 @@ public class MediaFilePanel extends javax.swing.JPanel {
         jButtonPlay.setBackground(new java.awt.Color(204, 255, 204));
         jButtonPlay.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jButtonPlay.setText("Reproducir");
+        jButtonPlay.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         jButtonPlay.setEnabled(false);
         jButtonPlay.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -582,6 +631,8 @@ public class MediaFilePanel extends javax.swing.JPanel {
         });
         add(jButtonPlay);
         jButtonPlay.setBounds(280, 80, 100, 23);
+        add(jProgressBar);
+        jProgressBar.setBounds(20, 340, 500, 20);
     }// </editor-fold>//GEN-END:initComponents
 
     private void jComboBoxFilterActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBoxFilterActionPerformed
@@ -618,6 +669,7 @@ public class MediaFilePanel extends javax.swing.JPanel {
     private javax.swing.JLabel jLabelBuscar;
     private javax.swing.JLabel jLabelTitle;
     private javax.swing.JList<String> jListMimeTypes;
+    private javax.swing.JProgressBar jProgressBar;
     private javax.swing.JScrollPane jScrollPaneMimeTypes;
     private javax.swing.JScrollPane jScrollPaneTable;
     private javax.swing.JTable jTable;

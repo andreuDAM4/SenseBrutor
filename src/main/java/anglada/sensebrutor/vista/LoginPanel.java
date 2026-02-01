@@ -39,7 +39,7 @@ public class LoginPanel extends JPanel {
         setBounds(0, 0, 550, 420);
 
         JLabel title = new JLabel("Iniciar sesión");
-        title.setFont(new Font("Arial", Font.BOLD, 22));
+        title.setFont(new Font("Segoe UI", Font.BOLD, 24));
         title.setBounds(205, 20, 300, 40);
         add(title);
 
@@ -65,13 +65,13 @@ public class LoginPanel extends JPanel {
 
         loginButton = new JButton("Entrar");
         loginButton.setBounds(150, 195, 250, 30);
-        loginButton.setCursor(new Cursor(Cursor.HAND_CURSOR)); // Cursor de mano al pasar
+        loginButton.setCursor(new Cursor(Cursor.HAND_CURSOR)); // Cursor de ma
         loginButton.addActionListener(e -> intentarLogin());
         add(loginButton);
 
         // --- SPINNER (GIF DE CARGA) ---
         spinnerLabel = new JLabel();
-        URL spinnerURL = getClass().getResource("/images/loading.gif"); // Asegúrate de que exista
+        URL spinnerURL = getClass().getResource("/images/loading.gif");
         if (spinnerURL != null) {
             spinnerLabel.setIcon(new ImageIcon(spinnerURL));
         }

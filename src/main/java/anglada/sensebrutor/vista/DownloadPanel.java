@@ -93,38 +93,43 @@ public class DownloadPanel extends javax.swing.JPanel {
         add(jComboBoxFormat);
         jComboBoxFormat.setBounds(120, 150, 340, 30);
 
+        jButtonDownload.setBackground(new java.awt.Color(78, 78, 255));
         jButtonDownload.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        jButtonDownload.setForeground(new java.awt.Color(255, 255, 255));
         jButtonDownload.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/iconoyoutube1.png"))); // NOI18N
         jButtonDownload.setText("Descargar");
         jButtonDownload.setToolTipText("Acción que descarga el video del formato seleccionado y lo guarda en a la carpeta asignada en configuración.");
+        jButtonDownload.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         jButtonDownload.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButtonDownloadActionPerformed(evt);
             }
         });
         add(jButtonDownload);
-        jButtonDownload.setBounds(210, 190, 140, 20);
+        jButtonDownload.setBounds(190, 190, 190, 50);
         add(jProgressBarDownload);
-        jProgressBarDownload.setBounds(130, 240, 300, 30);
+        jProgressBarDownload.setBounds(130, 270, 300, 30);
         add(jLabelProgress);
-        jLabelProgress.setBounds(250, 220, 100, 16);
+        jLabelProgress.setBounds(250, 250, 100, 16);
 
+        jButtonPlay.setBackground(new java.awt.Color(204, 255, 204));
         jButtonPlay.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jButtonPlay.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/playyoutbebrili.png"))); // NOI18N
         jButtonPlay.setText("Reproducir");
         jButtonPlay.setToolTipText("Reproducir con reproductor predeterminado.");
+        jButtonPlay.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         jButtonPlay.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButtonPlayActionPerformed(evt);
             }
         });
         add(jButtonPlay);
-        jButtonPlay.setBounds(190, 280, 170, 39);
+        jButtonPlay.setBounds(190, 310, 180, 39);
 
         jLabelLoadFormat.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jLabelLoadFormat.setText("Cargando formatos...");
         add(jLabelLoadFormat);
-        jLabelLoadFormat.setBounds(230, 220, 140, 16);
+        jLabelLoadFormat.setBounds(240, 250, 140, 16);
     }// </editor-fold>//GEN-END:initComponents
     
     // Método simple per extreure el porcentge de descarrega la línea de yt-dlp per despres posar dins el progress bar
@@ -267,11 +272,11 @@ public class DownloadPanel extends javax.swing.JPanel {
                } else {
                    JOptionPane.showMessageDialog(
                        DownloadPanel.this,
-                       "No s'ha pogut trobar l'arxiu descarregat.",
-                       "Error en descàrrega",
+                       "No se ha podido encontrar el archivo descargado.",
+                       "Error en la descarrega",
                        JOptionPane.ERROR_MESSAGE
                    );
-                   System.out.println("Fitxer final no trobat: " + downloadedFilePathTemp);
+                   System.out.println("No se ha podido encontrar el archivo descargado: " + downloadedFilePathTemp);
                }
            }
        };
@@ -440,12 +445,12 @@ public class DownloadPanel extends javax.swing.JPanel {
 
             @Override
             protected void done() {
-                jLabelProgress.setText("Finalitzat");
+                jLabelProgress.setText("Finalizado");
 
                 if (yaExiste) {
                     JOptionPane.showMessageDialog(DownloadPanel.this,
-                        "El fitxer ja existeix a la carpeta.",
-                        "Ja descarregat",
+                        "El archivo ya existe en la carpeta.",
+                        "Ya descargado",
                         JOptionPane.INFORMATION_MESSAGE);
                     return;
                 }
@@ -464,16 +469,14 @@ public class DownloadPanel extends javax.swing.JPanel {
                             try (FileWriter fw = new FileWriter(m3uFile, true)) {
                                 fw.write(downloadedFile.getAbsolutePath() + "\n");
                             }
-                            System.out.println("M3U actualitzat: " + m3uFile.getAbsolutePath());
+                            System.out.println("M3U actualizado: " + m3uFile.getAbsolutePath());
                         } catch (IOException ex) {
                             System.err.println("Error M3U: " + ex.getMessage());
                         }
                     }
                 } else {
                     JOptionPane.showMessageDialog(DownloadPanel.this,
-                        "No s'ha pogut descarregar el contingut.\n" +
-                        "Prova actualitzar yt-dlp, instal·lar de nou o provar una altra URL.",
-                        "Error de descàrrega",
+                        "No se ha podido descargar el contenido.\n" + "Prueba a actualizar yt-dlp, instalarlo de nuevo o probar con otra URL.", "Error de descarga",
                         JOptionPane.ERROR_MESSAGE);
                 }
             }
@@ -490,8 +493,7 @@ public class DownloadPanel extends javax.swing.JPanel {
         if (downloadPath.isEmpty()) {
             JOptionPane.showMessageDialog(
                 this,
-                "No s'ha configurat carpeta de descàrregues.\nSelecciona'n una.",
-                "Carpeta de destí",
+                "No se ha configurado la carpeta de descargas.\nSelecciona una.", "Carpeta de destino",
                 JOptionPane.INFORMATION_MESSAGE
             );
             prefs.elegirCarpetaDescarga();
@@ -505,13 +507,13 @@ public class DownloadPanel extends javax.swing.JPanel {
         String selectedItem = (String) jComboBoxFormat.getSelectedItem();
 
         if (selectedItem == null) {
-            JOptionPane.showMessageDialog(this, "Selecciona un format primer.");
+            JOptionPane.showMessageDialog(this, "Selecciona un formato primero.");
             return;
         }
 
         String url = jTextFieldURL.getText().trim();
         if (url.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Introdueix una URL vàlida.");
+            JOptionPane.showMessageDialog(this, "Introduce una URL válida.");
             return;
         }
 
@@ -568,8 +570,7 @@ public class DownloadPanel extends javax.swing.JPanel {
         if (ytdlpPath == null || ytdlpPath.isEmpty()) {
             JOptionPane.showMessageDialog(
                 this,
-                "No s'ha configurat la ruta de yt-dlp.\nSi us plau, selecciona l'executable.",
-                "Ruta de yt-dlp necessària",
+                "No se ha configurado la ruta de yt-dlp.\nPor favor, selecciona el ejecutable.", "Ruta de yt-dlp necesaria",
                 JOptionPane.INFORMATION_MESSAGE
             );
             prefs.elegirArchivoYTDLP();
@@ -580,7 +581,7 @@ public class DownloadPanel extends javax.swing.JPanel {
         jProgressBarDownload.setIndeterminate(true);
         jProgressBarDownload.setVisible(true);
         jLabelLoadFormat.setVisible(true);
-        jLabelLoadFormat.setText("Preparant opcions...");
+        jLabelLoadFormat.setText("Preparando opciones...");
 
         SwingWorker<Void, Void> worker = new SwingWorker<>() {
             @Override

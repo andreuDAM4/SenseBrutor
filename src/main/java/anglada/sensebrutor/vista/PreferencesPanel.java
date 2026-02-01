@@ -1,6 +1,7 @@
 package anglada.sensebrutor.vista;
 
 import anglada.sensebrutor.SenseBrutor;
+import java.awt.Color;
 import java.io.File;
 import javax.swing.JFileChooser;
 
@@ -16,7 +17,8 @@ public class PreferencesPanel extends javax.swing.JPanel {
     private final SenseBrutor mainFrame;
     public PreferencesPanel(SenseBrutor mainFrame) {
         initComponents();
-        this.mainFrame = mainFrame; 
+        this.mainFrame = mainFrame;
+        validarRutas();
     }
     
     /*Serie de funcions necessaries per la descarrega*/
@@ -54,6 +56,36 @@ public class PreferencesPanel extends javax.swing.JPanel {
        jSpinnerVelocity.setValue(0);
        jCheckBoxM3u.setSelected(false);
    }
+   private void validarRutas() {
+        String pathDescarga = jTextFieldDownloadPath.getText().trim();
+        String pathYtdlp = jTextFieldPathYTDLP.getText().trim();
+
+        // Validación Carpeta de Descarga: Rojo si está vacío O si no existe
+        if (!pathDescarga.isEmpty()) {
+            File f = new File(pathDescarga);
+            if (f.exists() && f.isDirectory()) {
+                jTextFieldDownloadPath.setBackground(Color.WHITE);
+            } else {
+                jTextFieldDownloadPath.setBackground(new Color(255, 200, 200));
+            }
+        } else {
+            // CAMBIO: Si está vacío, también marcamos en rojo (o un amarillo de advertencia)
+            jTextFieldDownloadPath.setBackground(new Color(255, 200, 200));
+        }
+
+        // Validación YT-DLP: Rojo si está vacío O si no existe
+        if (!pathYtdlp.isEmpty()) {
+            File f = new File(pathYtdlp);
+            if (f.exists() && f.isFile()) {
+                jTextFieldPathYTDLP.setBackground(Color.WHITE);
+            } else {
+                jTextFieldPathYTDLP.setBackground(new Color(255, 200, 200));
+            }
+        } else {
+            // CAMBIO: Si está vacío, también marcamos en rojo
+            jTextFieldPathYTDLP.setBackground(new Color(255, 200, 200));
+        }
+        }
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -73,6 +105,7 @@ public class PreferencesPanel extends javax.swing.JPanel {
         jLabelPathYTDLP = new javax.swing.JLabel();
         jButtonPathYTDLP = new javax.swing.JButton();
         jTextFieldPathYTDLP = new javax.swing.JTextField();
+        jLabelTitlePreferences = new javax.swing.JLabel();
 
         jFileChooserGeneral.setApproveButtonText("Seleccionar");
         jFileChooserGeneral.setDialogTitle("Selecciona una carpeta para guardar");
@@ -84,7 +117,7 @@ public class PreferencesPanel extends javax.swing.JPanel {
         jLabelDownloadPathFile.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jLabelDownloadPathFile.setText("Guardar archivo en");
         add(jLabelDownloadPathFile);
-        jLabelDownloadPathFile.setBounds(50, 10, 190, 16);
+        jLabelDownloadPathFile.setBounds(40, 80, 190, 16);
 
         jButtonDownloadPath.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jButtonDownloadPath.setText("Seleccionar Carpeta");
@@ -94,26 +127,32 @@ public class PreferencesPanel extends javax.swing.JPanel {
             }
         });
         add(jButtonDownloadPath);
-        jButtonDownloadPath.setBounds(50, 30, 160, 23);
+        jButtonDownloadPath.setBounds(40, 120, 160, 23);
+
+        jTextFieldDownloadPath.setToolTipText("Ruta absoluta donde se guardarán los vídeos y audios.");
+        jTextFieldDownloadPath.setEnabled(false);
         add(jTextFieldDownloadPath);
-        jTextFieldDownloadPath.setBounds(220, 30, 281, 22);
+        jTextFieldDownloadPath.setBounds(210, 120, 281, 22);
 
         jCheckBoxM3u.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jCheckBoxM3u.setText("Crear archivo .m3u");
+        jCheckBoxM3u.setToolTipText("Si se marca, cada descarga se añadirá automáticamente a una lista de reproducción .m3u");
         add(jCheckBoxM3u);
-        jCheckBoxM3u.setBounds(50, 70, 170, 20);
+        jCheckBoxM3u.setBounds(40, 160, 170, 20);
 
         jLabelVelocity.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jLabelVelocity.setText("Velocidad máxima (KB/s)");
         add(jLabelVelocity);
-        jLabelVelocity.setBounds(50, 110, 150, 16);
+        jLabelVelocity.setBounds(40, 210, 150, 16);
+
+        jSpinnerVelocity.setToolTipText("Establece 0 para velocidad ilimitada.");
         add(jSpinnerVelocity);
-        jSpinnerVelocity.setBounds(220, 110, 64, 22);
+        jSpinnerVelocity.setBounds(220, 210, 64, 22);
 
         jLabelPathYTDLP.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jLabelPathYTDLP.setText("Ruta YT-DLP");
         add(jLabelPathYTDLP);
-        jLabelPathYTDLP.setBounds(50, 150, 130, 16);
+        jLabelPathYTDLP.setBounds(40, 260, 130, 16);
 
         jButtonPathYTDLP.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jButtonPathYTDLP.setText("Seleccionar archivo");
@@ -123,22 +162,29 @@ public class PreferencesPanel extends javax.swing.JPanel {
             }
         });
         add(jButtonPathYTDLP);
-        jButtonPathYTDLP.setBounds(50, 180, 160, 23);
+        jButtonPathYTDLP.setBounds(40, 290, 160, 23);
+
+        jTextFieldPathYTDLP.setEnabled(false);
         add(jTextFieldPathYTDLP);
-        jTextFieldPathYTDLP.setBounds(220, 180, 290, 22);
+        jTextFieldPathYTDLP.setBounds(210, 290, 280, 22);
+
+        jLabelTitlePreferences.setFont(new java.awt.Font("Segoe UI", 1, 32)); // NOI18N
+        jLabelTitlePreferences.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/engranajes-mecanicos1.png"))); // NOI18N
+        jLabelTitlePreferences.setText("Configuración");
+        add(jLabelTitlePreferences);
+        jLabelTitlePreferences.setBounds(150, 20, 320, 50);
     }// </editor-fold>//GEN-END:initComponents
     
     //FileChooser que permet navegar i seleccionar una ruta directori
     private void jButtonDownloadPathActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDownloadPathActionPerformed
-        jFileChooserGeneral.setDialogTitle("Selecciona la carpeta donde guardar");
+        jFileChooserGeneral.setDialogTitle("Selecciona la carpeta de descarga");
         jFileChooserGeneral.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-        int result = jFileChooserGeneral.showOpenDialog(this);
-        
-        if (result == JFileChooser.APPROVE_OPTION) {
-            File carpeta = jFileChooserGeneral.getSelectedFile();
-            String ruta = carpeta.getAbsolutePath();
-            // Guarda la ruta en una variable o textfield
-            jTextFieldDownloadPath.setText(ruta);
+
+        if (jFileChooserGeneral.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+            jTextFieldDownloadPath.setText(jFileChooserGeneral.getSelectedFile().getAbsolutePath());
+            validarRutas(); // Feedback visual
+
+            // Notificar al frame principal para actualizar la biblioteca
             if (mainFrame != null && mainFrame.getMediaFilePanel() != null) {
                 mainFrame.getMediaFilePanel().reloadIfConfigured();
             }
@@ -154,6 +200,7 @@ public class PreferencesPanel extends javax.swing.JPanel {
         if (result == JFileChooser.APPROVE_OPTION) {
             File archivo = jFileChooserGeneral.getSelectedFile();
             jTextFieldPathYTDLP.setText(archivo.getAbsolutePath());
+            validarRutas(); // <--- AÑADE ESTO AQUÍ
         }
     }//GEN-LAST:event_jButtonPathYTDLPActionPerformed
 
@@ -165,6 +212,7 @@ public class PreferencesPanel extends javax.swing.JPanel {
     private javax.swing.JFileChooser jFileChooserGeneral;
     private javax.swing.JLabel jLabelDownloadPathFile;
     private javax.swing.JLabel jLabelPathYTDLP;
+    private javax.swing.JLabel jLabelTitlePreferences;
     private javax.swing.JLabel jLabelVelocity;
     private javax.swing.JSpinner jSpinnerVelocity;
     private javax.swing.JTextField jTextFieldDownloadPath;

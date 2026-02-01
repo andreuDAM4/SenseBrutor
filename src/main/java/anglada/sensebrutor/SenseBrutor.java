@@ -110,12 +110,25 @@ public final class SenseBrutor extends javax.swing.JFrame {
     public void borrarSesion() {
         if (sessionFile.exists()) sessionFile.delete();
     }
+    
+    //Quan hi ha login panel deshabilitam opcions del menu
+    private void setMenusEnabled(boolean enabled) {
+        jMenuItemDownload.setEnabled(enabled);
+        jMenuItemServidor.setEnabled(enabled);
+        jMenuItemPreferences.setEnabled(enabled);
+        jMenuItemLogout.setEnabled(enabled);
+
+        jMenuItemExit.setEnabled(true);
+        jMenuItemAbout.setEnabled(true);
+    }
+    
     public void mostrarLogin() {
         downloadpanel.setVisible(false);
         mediaFilePanel.setVisible(false);
         preferencesPanel.setVisible(false);
         loginPanel.setVisible(true);
-        jMenuItemPreferences.setEnabled(false);
+        //Deshabilitam menus
+        setMenusEnabled(false);
 
     }
     public void loginCorrecto() {
@@ -124,6 +137,8 @@ public final class SenseBrutor extends javax.swing.JFrame {
         mediaFilePanel.setVisible(false);
         preferencesPanel.setVisible(false);
         jMenuItemPreferences.setEnabled(true);
+        //Habilitam menus
+        setMenusEnabled(true);
 
     }
     public void mostrarDownloadPanel() {
@@ -207,9 +222,9 @@ public final class SenseBrutor extends javax.swing.JFrame {
 
         jMenuBar1.add(jMenuFile);
 
-        jMenuServidor.setText("Servidor");
+        jMenuServidor.setText("Medios");
 
-        jMenuItemServidor.setText("Local / Remoto");
+        jMenuItemServidor.setText("Biblioteca de Medios");
         jMenuItemServidor.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jMenuItemServidorActionPerformed(evt);

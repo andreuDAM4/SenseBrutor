@@ -16,18 +16,6 @@ SenseBrutor és una aplicació amb interfície gràfica (GUI) desenvolupada en J
   - Registre d'usuari: andreuanglada@whatever.ever
   - Pujada de mínim 3 arxius multimèdia (ID:48, ID:49, ID:50)
 
-    **Millores d'Usabilitat (Tarea DI04):**
-    - Implementació d'un Spinner (GIF de càrrega) que s'activa durant la petició a l'API per indicar que l'aplicació està treballant.
-    - Canvi dinàmic del cursor del ratolí a WAIT_CURSOR durant l'espera i a HAND_CURSOR en passar sobre el botó d'entrar.
-    - Interacció millorada (Affordance):
-    - Configuració de la tecla Intro com a disparador per defecte del login, permetent l'accés sense usar el ratolí.
-    - Ús de Tooltips informatius als camps de text per guiar l'usuari.
-    - Gestió d'errors i recuperabilitat:
-    - Control d'excepcions per capturar errors de xarxa o credencials incorrectes (401), mostrant missatges clars en el statusLabel en color vermell.
-    - Bloqueig del botó de login durant la càrrega per evitar duplicitat de peticions.
-    - Multi-threading:
-    - L'autenticació s'executa en un fil (Thread) independent per evitar que la interfície gràfica es congeli mentre s'espera la resposta del servidor Azure.
-
 ## Panell Descarrega
 
 - Es pot afegir una URL de YouTube per començar la descàrrega.
@@ -60,6 +48,7 @@ SenseBrutor és una aplicació amb interfície gràfica (GUI) desenvolupada en J
 - Selecció de velocitat màxima de descàrrega, si es deixa a 0 no hi haurà màxim.
 
 - Ruta on tenim l’exe per executar els comands necessaris.
+
 
 ## DIMediaNetPollingComponent
 - Componente JavaBean desenvolupat per interactuar amb **DI Media Network**.
@@ -104,6 +93,44 @@ SenseBrutor és una aplicació amb interfície gràfica (GUI) desenvolupada en J
   - Missatge si l’arxiu no existeix localment.
   - Missatge si l’arxiu remot no existeix.
   - Missatge si el format seleccionat no és vàlid.
+
+## Documentació de Disseny i Usabilitat (UX - Tarea DI04)
+
+**Aspecte, Color, Icones i Text:**
+
+- Ús d'iconografia descriptiva e imatges en títols per millorar l'estètica (Look & Feel).
+
+- Implementació de la nova clase **EstadoRenderer**: Les files de la taula es pinten de colors (Taronja, Blau, Verd) segons l'estat. Justificació: Aplica el principi de visibilitat i consistència.
+
+- Jerarquia de fonts clara amb Segoe UI per millorar la legibilitat.
+
+**Affordance, Feedback i Restriccions:**
+
+- Affordance: Canvi de cursor a HAND_CURSOR en botons i ús de Tooltips informatius en cada camp.
+
+- Feedback: GIFs de càrrega (Spinners) i JProgressBar durant tasques de xarxa. Justificació: Evita la incertesa de l'usuari durant l'espera.
+
+- Restriccions (Constraints): Camps de rutes no editables manualment (setEditable(false)) per evitar errors.
+
+- Seguretat: Bloqueig de botons durant transferències de dades per evitar peticions duplicades.
+
+**Altres millores d'usabilitat:**
+
+- Natural Mapping: Configuració de la tecla Intro com a disparador per defecte del login.
+
+- Multi-threading: Totes les crides pesades (API, yt-dlp) s'executen en fils secundaris (Threads) per no congelar la interfície.
+
+- Familiaritat: Ús de components estàndard per a una mínima sorpresa (Acció per defecte en prémer Intro, Bloqueig de botons quan una descàrrega està en curs, Ordre de tabulació quan l'usuari prem la tecla Tab).
+
+- Dark pattern: Botó descarrega y reproduir grans.
+
+**Gestió d'errors i Recuperabilitat:**
+
+- Control d'excepcions (401, 403) amb missatges clars al statusLabel en color vermell.
+
+- Validació en temps real: El fons dels camps de rutes dins la configuració canvia a vermell si el camí no és vàlid físicament.
+
+- Missatges de confirmació i error mitjançant JOptionPane per garantir la recuperabilitat davant fallades de xarxa.
 
 ## Acerca de
 
