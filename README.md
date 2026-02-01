@@ -16,6 +16,18 @@ SenseBrutor és una aplicació amb interfície gràfica (GUI) desenvolupada en J
   - Registre d'usuari: andreuanglada@whatever.ever
   - Pujada de mínim 3 arxius multimèdia (ID:48, ID:49, ID:50)
 
+    **Millores d'Usabilitat (Tarea DI04):**
+    - Implementació d'un Spinner (GIF de càrrega) que s'activa durant la petició a l'API per indicar que l'aplicació està treballant.
+    - Canvi dinàmic del cursor del ratolí a WAIT_CURSOR durant l'espera i a HAND_CURSOR en passar sobre el botó d'entrar.
+    - Interacció millorada (Affordance):
+    - Configuració de la tecla Intro com a disparador per defecte del login, permetent l'accés sense usar el ratolí.
+    - Ús de Tooltips informatius als camps de text per guiar l'usuari.
+    - Gestió d'errors i recuperabilitat:
+    - Control d'excepcions per capturar errors de xarxa o credencials incorrectes (401), mostrant missatges clars en el statusLabel en color vermell.
+    - Bloqueig del botó de login durant la càrrega per evitar duplicitat de peticions.
+    - Multi-threading:
+    - L'autenticació s'executa en un fil (Thread) independent per evitar que la interfície gràfica es congeli mentre s'espera la resposta del servidor Azure.
+
 ## Panell Descarrega
 
 - Es pot afegir una URL de YouTube per començar la descàrrega.

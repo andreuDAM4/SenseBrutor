@@ -47,18 +47,18 @@ public final class SenseBrutor extends javax.swing.JFrame {
         });
         jMenuFile.insert(logoutItem, 0);*/
 
-        downloadpanel.setBounds(0, 0, 500, 340);
-        mediaFilePanel.setBounds(0, 0, 550, 340);
+        downloadpanel.setBounds(0, 0, 500, 440);
+        mediaFilePanel.setBounds(0, 0, 550, 440);
         //mediaFilePanel.setBounds(500, 0, 550, 340);
-        preferencesPanel.setBounds(0, 0, 500, 400);
-        loginPanel.setBounds(0, 0, 500, 340);
+        preferencesPanel.setBounds(0, 0, 500, 440);
+        loginPanel.setBounds(0, 0, 500, 440);
 
         getContentPane().add(downloadpanel);
         getContentPane().add(mediaFilePanel);
         getContentPane().add(preferencesPanel);
         getContentPane().add(loginPanel);
         setLayout(null);
-        setSize(550, 340);
+        setSize(550, 440);
         setLocationRelativeTo(null);
         setResizable(false);
         

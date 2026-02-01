@@ -60,14 +60,15 @@ public class DownloadPanel extends javax.swing.JPanel {
         setLayout(null);
 
         jLabelTittle.setFont(new java.awt.Font("Consolas", 1, 24)); // NOI18N
-        jLabelTittle.setText("SenseBrutor");
+        jLabelTittle.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/titulosensebruto1r.png"))); // NOI18N
+        jLabelTittle.setToolTipText("");
         add(jLabelTittle);
-        jLabelTittle.setBounds(210, 10, 170, 29);
+        jLabelTittle.setBounds(110, 0, 320, 120);
 
         jLabelURL.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jLabelURL.setText("URL:");
         add(jLabelURL);
-        jLabelURL.setBounds(70, 50, 30, 16);
+        jLabelURL.setBounds(80, 120, 30, 16);
 
         jTextFieldURL.setToolTipText("Video de youtube a descargar.");
         jTextFieldURL.addFocusListener(new java.awt.event.FocusAdapter() {
@@ -76,12 +77,12 @@ public class DownloadPanel extends javax.swing.JPanel {
             }
         });
         add(jTextFieldURL);
-        jTextFieldURL.setBounds(120, 48, 340, 30);
+        jTextFieldURL.setBounds(120, 110, 340, 30);
 
         jLabelFormat.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jLabelFormat.setText("Formato:");
         add(jLabelFormat);
-        jLabelFormat.setBounds(60, 90, 60, 16);
+        jLabelFormat.setBounds(60, 160, 60, 16);
 
         jComboBoxFormat.setToolTipText("Formato de salida.");
         jComboBoxFormat.addActionListener(new java.awt.event.ActionListener() {
@@ -90,9 +91,10 @@ public class DownloadPanel extends javax.swing.JPanel {
             }
         });
         add(jComboBoxFormat);
-        jComboBoxFormat.setBounds(120, 90, 340, 30);
+        jComboBoxFormat.setBounds(120, 150, 340, 30);
 
         jButtonDownload.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        jButtonDownload.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/iconoyoutube1.png"))); // NOI18N
         jButtonDownload.setText("Descargar");
         jButtonDownload.setToolTipText("Acción que descarga el video del formato seleccionado y lo guarda en a la carpeta asignada en configuración.");
         jButtonDownload.addActionListener(new java.awt.event.ActionListener() {
@@ -101,13 +103,14 @@ public class DownloadPanel extends javax.swing.JPanel {
             }
         });
         add(jButtonDownload);
-        jButtonDownload.setBounds(200, 130, 150, 23);
+        jButtonDownload.setBounds(210, 190, 140, 20);
         add(jProgressBarDownload);
-        jProgressBarDownload.setBounds(130, 180, 300, 30);
+        jProgressBarDownload.setBounds(130, 240, 300, 30);
         add(jLabelProgress);
-        jLabelProgress.setBounds(220, 160, 100, 16);
+        jLabelProgress.setBounds(250, 220, 100, 16);
 
         jButtonPlay.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        jButtonPlay.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/playyoutbebrili.png"))); // NOI18N
         jButtonPlay.setText("Reproducir");
         jButtonPlay.setToolTipText("Reproducir con reproductor predeterminado.");
         jButtonPlay.addActionListener(new java.awt.event.ActionListener() {
@@ -116,12 +119,12 @@ public class DownloadPanel extends javax.swing.JPanel {
             }
         });
         add(jButtonPlay);
-        jButtonPlay.setBounds(210, 220, 120, 23);
+        jButtonPlay.setBounds(190, 280, 170, 39);
 
         jLabelLoadFormat.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jLabelLoadFormat.setText("Cargando formatos...");
         add(jLabelLoadFormat);
-        jLabelLoadFormat.setBounds(220, 160, 140, 16);
+        jLabelLoadFormat.setBounds(230, 220, 140, 16);
     }// </editor-fold>//GEN-END:initComponents
     
     // Método simple per extreure el porcentge de descarrega la línea de yt-dlp per despres posar dins el progress bar
@@ -469,7 +472,7 @@ public class DownloadPanel extends javax.swing.JPanel {
                 } else {
                     JOptionPane.showMessageDialog(DownloadPanel.this,
                         "No s'ha pogut descarregar el contingut.\n" +
-                        "Prova actualitzar yt-dlp, instal·lar Deno o provar una altra URL.",
+                        "Prova actualitzar yt-dlp, instal·lar de nou o provar una altra URL.",
                         "Error de descàrrega",
                         JOptionPane.ERROR_MESSAGE);
                 }

@@ -5,33 +5,38 @@ import anglada.sensebrutor.SenseBrutor;
 
 import javax.swing.*;
 import java.awt.*;
-/**
- * Panell per iniciar sesió a l'aplicación.
- * Permet introduir usuari i contrasenya
- * Si esta el check de recordar i es tanca sessió es mantenen les dades.
- * @author Andreu
- */
+import java.net.URL;
+
 public class LoginPanel extends JPanel {
 
     private final SenseBrutor main;
     private final DIMediaNetPollingComponent component;
-
     private JTextField emailField;
     private JPasswordField passwordField;
     private JCheckBox rememberCheck;
     private JButton loginButton;
     private JLabel statusLabel;
+    private JLabel logoLabel;
+    private JLabel spinnerLabel; // JLabel para el GIF de carga
 
     public LoginPanel(SenseBrutor main) {
         this.main = main;
         this.component = main.getDiMediaPolling();
+
         initUI();
+
+        SwingUtilities.invokeLater(() -> {
+            JRootPane root = SwingUtilities.getRootPane(this);
+            if (root != null) {
+                root.setDefaultButton(loginButton);
+            }
+        });
     }
 
     private void initUI() {
         setLayout(null);
         setBackground(new Color(240, 240, 240));
-        setBounds(0, 0, 550, 340);
+        setBounds(0, 0, 550, 420);
 
         JLabel title = new JLabel("Iniciar sesión");
         title.setFont(new Font("Arial", Font.BOLD, 22));
@@ -60,65 +65,98 @@ public class LoginPanel extends JPanel {
 
         loginButton = new JButton("Entrar");
         loginButton.setBounds(150, 195, 250, 30);
+        loginButton.setCursor(new Cursor(Cursor.HAND_CURSOR)); // Cursor de mano al pasar
         loginButton.addActionListener(e -> intentarLogin());
         add(loginButton);
 
+        // --- SPINNER (GIF DE CARGA) ---
+        spinnerLabel = new JLabel();
+        URL spinnerURL = getClass().getResource("/images/loading.gif"); // Asegúrate de que exista
+        if (spinnerURL != null) {
+            spinnerLabel.setIcon(new ImageIcon(spinnerURL));
+        }
+        spinnerLabel.setBounds(410, 195, 30, 30); // Al lado del botón
+        spinnerLabel.setVisible(false); // Oculto al inicio
+        add(spinnerLabel);
+
         statusLabel = new JLabel("", SwingConstants.CENTER);
         statusLabel.setForeground(Color.RED);
-        statusLabel.setBounds(50, 230, 400, 30);
+        statusLabel.setBounds(0, 230, 550, 30);
         add(statusLabel);
+
+        URL imgURL = getClass().getResource("/images/titulosensebruto1r.png");
+        if (imgURL != null) {
+            ImageIcon icon = new ImageIcon(imgURL);
+            int logoWidth = 200;
+            int logoHeight = (int) ((double) icon.getIconHeight() / icon.getIconWidth() * logoWidth);
+            Image scaledImage = icon.getImage().getScaledInstance(logoWidth, logoHeight, Image.SCALE_SMOOTH);
+            logoLabel = new JLabel(new ImageIcon(scaledImage));
+
+            int logoX = loginButton.getX() + (loginButton.getWidth() - logoWidth) / 2;
+            int logoY = loginButton.getY() + loginButton.getHeight() + 10;
+            logoLabel.setBounds(logoX, logoY, logoWidth, logoHeight);
+            add(logoLabel);
+        }
     }
 
     private void intentarLogin() {
         String email = emailField.getText().trim();
-        String password = new String(passwordField.getPassword());
-        //Llevar mensatges previs
+        String password = new String(passwordField.getPassword()).trim();
+        
         statusLabel.setText("");
-        // Validació camps buits
-        if (email.isBlank() || password.isBlank()) {
-            statusLabel.setText("Introduce email y contraseña.");
+
+        if (email.isEmpty() || password.isEmpty()) {
+            statusLabel.setForeground(Color.RED);
+            statusLabel.setText("Por favor, introduce tu email y contraseña.");
             return;
         }
-        //Desactivar boto per evitar multiples clicks
+
+        // --- INICIO CARGA: Feedback visual ---
         loginButton.setEnabled(false);
-        //Utilitzam thread apres a l'assignatura PSP per fer llamada a API for des fil de UI
+        spinnerLabel.setVisible(true); // Mostrar el spinner
+        this.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR)); // Ratón en espera
+
         new Thread(() -> {
             try {
                 String token = component.login(email, password);
-                //Es guarda token a un fitxer
-                if (rememberCheck.isSelected()) {
-                    main.guardarSesion(token);
-                } else {
-                    main.borrarSesion();
+
+                if (token != null && !token.isEmpty()) {
+                    if (rememberCheck.isSelected()) {
+                        main.guardarSesion(token);
+                    } else {
+                        main.borrarSesion();
+                    }
+                    main.jwt = token;
+                    component.setRunning(true);
+
+                    SwingUtilities.invokeLater(() -> {
+                        statusLabel.setForeground(new Color(0, 130, 0));
+                        statusLabel.setText("Login correcto. ¡Bienvenido!");
+                        main.loginCorrecto();
+                    });
                 }
-
-                // Guardar jwt dins main
-                main.jwt = token;
-                component.setRunning(true); // activa polling
-                //Actualitzar UI
-                SwingUtilities.invokeLater(() -> {
-                    statusLabel.setForeground(new Color(0, 130, 0));
-                    statusLabel.setText("Login correcto.");
-                    main.loginCorrecto(); //Mostra els panels posteriors al login
-                });
-
             } catch (Exception ex) {
                 SwingUtilities.invokeLater(() -> {
                     statusLabel.setForeground(Color.RED);
-                    statusLabel.setText("Error: " + ex.getMessage());
+                    String exMsg = ex.getMessage() != null ? ex.getMessage() : "";
+                    statusLabel.setText(exMsg.contains("401") ? "Usuario o contraseña incorrectos." : "Error: " + exMsg);
                 });
             } finally {
-                //Reactivar boto si hi ha error entra perfectament
-                SwingUtilities.invokeLater(() -> loginButton.setEnabled(true));
+                // --- FIN CARGA: Restaurar UI ---
+                SwingUtilities.invokeLater(() -> {
+                    loginButton.setEnabled(true);
+                    spinnerLabel.setVisible(false); // Ocultar spinner
+                    this.setCursor(Cursor.getDefaultCursor()); // Ratón normal
+                });
             }
         }).start();
     }
 
-    /** Utilitzat desde el menu cerrar sesión */
     public void limpiar() {
         emailField.setText("");
         passwordField.setText("");
         statusLabel.setText("");
         rememberCheck.setSelected(false);
+        spinnerLabel.setVisible(false);
     }
 }
