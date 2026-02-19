@@ -134,7 +134,7 @@
     <Component class="javax.swing.JLabel" name="jLabelProgress">
       <Constraints>
         <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout" value="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout$AbsoluteConstraintsDescription">
-          <AbsoluteConstraints x="250" y="250" width="100" height="16"/>
+          <AbsoluteConstraints x="260" y="250" width="90" height="16"/>
         </Constraint>
       </Constraints>
     </Component>

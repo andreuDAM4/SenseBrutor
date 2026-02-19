@@ -110,7 +110,7 @@ public class DownloadPanel extends javax.swing.JPanel {
         add(jProgressBarDownload);
         jProgressBarDownload.setBounds(130, 270, 300, 30);
         add(jLabelProgress);
-        jLabelProgress.setBounds(250, 250, 100, 16);
+        jLabelProgress.setBounds(260, 250, 90, 16);
 
         jButtonPlay.setBackground(new java.awt.Color(204, 255, 204));
         jButtonPlay.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
@@ -287,166 +287,103 @@ public class DownloadPanel extends javax.swing.JPanel {
     * Acció del botó descarregar: inclou barra de progrés i assigna downloadedFilePath
     * un cop finalitzat, per poder reproduir el fitxer descarregat.
     */
-   private void iniciarDescarga(String ytdlpPath, String url, String formatCode, String downloadPath, int maxVelocity) {
+    private void iniciarDescarga(String ytdlpPath, String url, String formatCode, String downloadPath, int maxVelocity) {
         jProgressBarDownload.setVisible(true);
         jProgressBarDownload.setValue(0);
-        jLabelProgress.setText("0%");
+        jLabelProgress.setText("Descargando...");
 
-        SwingWorker<Void, Integer> worker = new SwingWorker<>() {
+        SwingWorker<Void, String> worker = new SwingWorker<>() {
+            String lastSavedFile = null;
             boolean yaExiste = false;
-            String downloadedFilePathTemp = null;
-            final int maxIntents = 6;
 
             @Override
             protected Void doInBackground() throws Exception {
-                boolean descargaExitosa = false;
-                int intents = 0;
+                ProcessBuilder pb = new ProcessBuilder();
 
-                List<String[]> configuracions = new ArrayList<>();
-                configuracions.add(new String[]{null});  // Sense -f → millor opció automàtica
-                configuracions.add(new String[]{"bv*+ba/b"});  // Vídeo + àudio separat + merge
-                configuracions.add(new String[]{formatCode});  // El que ha triat l'usuari
-                configuracions.add(new String[]{"best"});      // Fallback clàssic
-                configuracions.add(new String[]{"bv*+ba/b", "--extractor-args", "youtube:player_client=android"});
-                configuracions.add(new String[]{"bv*+ba/b", "--extractor-args", "youtube:player_client=ios"});
+                pb.command().add(ytdlpPath);
+                pb.command().add("--newline");
+                pb.command().add("--restrict-filenames");
+                pb.command().add("--no-playlist");
+                pb.command().add("--retries"); pb.command().add("3");
+                pb.command().add("--fragment-retries"); pb.command().add("3");
 
-                while (!descargaExitosa && intents < configuracions.size()) {
-                    intents++;
-
-                    // Declarem tot aquí perquè estigui disponible dins del bucle i lambdas
-                    final String[] config = configuracions.get(intents - 1);
-                    final String formatActual = (config.length > 0 && config[0] != null) ? config[0] : null;
-                    final boolean usarFormat = formatActual != null;
-
-                    final String extractorKey   = (config.length > 1) ? config[1] : null;
-                    final String extractorValue = (config.length > 2) ? config[2] : null;
-
-                    final int intentActual = intents;
-                    final int totalIntents = configuracions.size();
-
-                    SwingUtilities.invokeLater(() -> {
-                        jProgressBarDownload.setValue(0);
-                        jLabelProgress.setText("Intent " + intentActual + "/" + totalIntents + "...");
-                    });
-
-                    ProcessBuilder pb = new ProcessBuilder();
-                    pb.command().add(ytdlpPath);
-                    pb.command().add("--newline");
-                    pb.command().add("--restrict-filenames");
-                    pb.command().add("--no-playlist");
-                    pb.command().add("--ignore-errors");
-                    pb.command().add("--retries");              pb.command().add("10");
-                    pb.command().add("--fragment-retries");     pb.command().add("10");
-                    pb.command().add("--sleep-requests");       pb.command().add("1");
-                    pb.command().add("--sleep-interval");       pb.command().add("2");
-                    pb.command().add("--max-sleep-interval");   pb.command().add("8");
-
-                    // Capçaleres per evitar 403 Forbidden
-                    pb.command().add("--user-agent");
-                    pb.command().add("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36");
-                    pb.command().add("--referer");
-                    pb.command().add("https://www.youtube.com/");
-
-                    // Afegim extractor-args si la configuració el té
-                    if (extractorKey != null && extractorValue != null) {
-                        pb.command().add(extractorKey);
-                        pb.command().add(extractorValue);
-                    }
-
-                    // Només afegim -f si cal
-                    if (usarFormat) {
+                // Forcem format correcte
+                if (formatCode != null) {
+                    if (formatCode.toLowerCase().contains("mp4")) {
                         pb.command().add("-f");
-                        pb.command().add(formatActual);
-                    }
-
-                    if (maxVelocity > 0) {
-                        pb.command().add("--limit-rate");
-                        pb.command().add(maxVelocity + "K");
-                    }
-
-                    pb.command().add("-o");
-                    pb.command().add(downloadPath + File.separator + "%(title)s.%(ext)s");
-                    pb.command().add(url);
-
-                    pb.redirectErrorStream(true);
-                    Process process = pb.start();
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8));
-
-                    String line;
-                    String lastLineWithQuotes = null;
-                    boolean fixedUp = false;
-                    yaExiste = false;
-
-                    while ((line = reader.readLine()) != null) {
-                        System.out.println("[yt-dlp] " + line);
-
-                        Integer percent = parsePercentage(line);
-                        if (percent != null) {
-                            publish(percent);
-                        }
-
-                        if (line.contains("has already been downloaded")) {
-                            yaExiste = true;
-                        }
-
-                        if (line.contains("\"") && !line.contains("http")) {
-                            lastLineWithQuotes = line;
-                        }
-
-                        // Captura del nom del fitxer en diverses situacions
-                        if (line.startsWith("[download] Destination:") ||
-                            line.startsWith("[FixupM3u8]") ||
-                            line.startsWith("[Merger]") ||
-                            line.contains("has been downloaded") ||
-                            line.startsWith("[ExtractAudio]")) {
-
-                            int firstQuote = line.indexOf("\"");
-                            int lastQuote = line.lastIndexOf("\"");
-                            if (firstQuote >= 0 && lastQuote > firstQuote) {
-                                downloadedFilePathTemp = line.substring(firstQuote + 1, lastQuote);
-                                fixedUp = true;
-                            }
-                        }
-
-                        if (line.contains("100.0%") || line.contains("[download] 100%")) {
-                            publish(100);
-                        }
-                    }
-
-                    // Últim intent de capturar el nom del fitxer
-                    if (!fixedUp && lastLineWithQuotes != null) {
-                        int firstQuote = lastLineWithQuotes.indexOf("\"");
-                        int lastQuote = lastLineWithQuotes.lastIndexOf("\"");
-                        if (firstQuote >= 0 && lastQuote > firstQuote) {
-                            downloadedFilePathTemp = lastLineWithQuotes.substring(firstQuote + 1, lastQuote);
-                        }
-                    }
-
-                    int exitCode = process.waitFor();
-
-                    // Si ha acabat bé o el fitxer existeix → èxit
-                    if (exitCode == 0 || (downloadedFilePathTemp != null && new File(downloadedFilePathTemp).exists())) {
-                        descargaExitosa = true;
-                        publish(100);
+                        pb.command().add("bv*[ext=mp4]+ba[ext=m4a]/best[ext=mp4]/best");
+                    } else if (formatCode.toLowerCase().contains("mp3")) {
+                        pb.command().add("-x");
+                        pb.command().add("--audio-format");
+                        pb.command().add("mp3");
+                    } else {
+                        pb.command().add("-f");
+                        pb.command().add(formatCode);
                     }
                 }
+
+                if (maxVelocity > 0) {
+                    pb.command().add("--limit-rate");
+                    pb.command().add(maxVelocity + "K");
+                }
+
+                pb.command().add("-o");
+                pb.command().add(downloadPath + File.separator + "%(title)s.%(ext)s");
+                pb.command().add(url);
+
+                pb.redirectErrorStream(true);
+                Process process = pb.start();
+
+                BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8));
+                String line;
+
+                while ((line = reader.readLine()) != null) {
+                    publish(line);
+
+                    // Detectem "already been downloaded" com abans
+                    if (line.contains("has already been downloaded")) {
+                        yaExiste = true;
+                    }
+
+                    // Parseig del nom final
+                    if (line.contains("Moving file") && line.contains("\" to \"")) {
+                        String[] parts = line.split("\" to \"");
+                        if (parts.length > 1) {
+                            lastSavedFile = parts[1].substring(0, parts[1].length() - 1);
+                        }
+                    } else if (line.contains("Merging formats into")) {
+                        String stringToRemove = "[Merger] Merging formats into";
+                        lastSavedFile = line.substring(line.indexOf(stringToRemove) + stringToRemove.length()).trim();
+                        lastSavedFile = lastSavedFile.replace("\"", "");
+                    } else if (line.contains("[download] Destination:")) {
+                        lastSavedFile = line.substring(line.indexOf(":") + 2).trim();
+                    }
+                }
+
+                process.waitFor();
 
                 return null;
             }
 
             @Override
-            protected void process(java.util.List<Integer> chunks) {
-                if (!chunks.isEmpty()) {
-                    int last = chunks.get(chunks.size() - 1);
-                    jProgressBarDownload.setValue(last);
-                    jLabelProgress.setText(last + "%");
+            protected void process(List<String> chunks) {
+                for (String line : chunks) {
+                    if (line.contains("%")) {
+                        Integer percent = parsePercentage(line);
+                        if (percent != null) {
+                            jProgressBarDownload.setValue(percent);
+                            jLabelProgress.setText(percent + "%");
+                        }
+                    }
                 }
             }
 
             @Override
             protected void done() {
+                jProgressBarDownload.setVisible(false);
                 jLabelProgress.setText("Finalizado");
 
+                // Si ja existia, mostrem missatge i no error
                 if (yaExiste) {
                     JOptionPane.showMessageDialog(DownloadPanel.this,
                         "El archivo ya existe en la carpeta.",
@@ -455,28 +392,25 @@ public class DownloadPanel extends javax.swing.JPanel {
                     return;
                 }
 
-                if (downloadedFilePathTemp != null && new File(downloadedFilePathTemp).exists()) {
-                    downloadedFilePath = downloadedFilePathTemp;
+                // Si hem capturat el nom i existeix → èxit
+                if (lastSavedFile != null && new File(lastSavedFile).exists()) {
+                    downloadedFilePath = lastSavedFile;
                     jButtonPlay.setVisible(true);
                     mainFrame.getMediaFilePanel().reloadIfConfigured();
 
                     if (mainFrame.getPreferencesPanel().isCreateM3U()) {
                         try {
-                            File downloadedFile = new File(downloadedFilePath);
-                            File folder = downloadedFile.getParentFile();
-                            File m3uFile = new File(folder, "playlist.m3u");
-
-                            try (FileWriter fw = new FileWriter(m3uFile, true)) {
-                                fw.write(downloadedFile.getAbsolutePath() + "\n");
+                            File f = new File(downloadedFilePath);
+                            File m3u = new File(f.getParentFile(), "playlist.m3u");
+                            try (FileWriter fw = new FileWriter(m3u, true)) {
+                                fw.write(f.getAbsolutePath() + "\n");
                             }
-                            System.out.println("M3U actualizado: " + m3uFile.getAbsolutePath());
-                        } catch (IOException ex) {
-                            System.err.println("Error M3U: " + ex.getMessage());
-                        }
+                        } catch (IOException ignored) {}
                     }
                 } else {
                     JOptionPane.showMessageDialog(DownloadPanel.this,
-                        "No se ha podido descargar el contenido.\n" + "Prueba a actualizar yt-dlp, instalarlo de nuevo o probar con otra URL.", "Error de descarga",
+                        "No se ha podido descargar.\nPrueba en otro momento.",
+                        "Error",
                         JOptionPane.ERROR_MESSAGE);
                 }
             }
@@ -488,7 +422,6 @@ public class DownloadPanel extends javax.swing.JPanel {
     private void jButtonDownloadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDownloadActionPerformed
         jButtonPlay.setVisible(false);
         PreferencesPanel prefs = mainFrame.getPreferencesPanel();
-
         String downloadPath = prefs.getDownloadPath();
         if (downloadPath.isEmpty()) {
             JOptionPane.showMessageDialog(
@@ -500,41 +433,32 @@ public class DownloadPanel extends javax.swing.JPanel {
             downloadPath = prefs.getDownloadPath();
             if (downloadPath.isEmpty()) return;
         }
-
         jLabelProgress.setVisible(true);
-
         String ytdlpPath = prefs.getYTDLPPath();
         String selectedItem = (String) jComboBoxFormat.getSelectedItem();
-
         if (selectedItem == null) {
             JOptionPane.showMessageDialog(this, "Selecciona un formato primero.");
             return;
         }
-
         String url = jTextFieldURL.getText().trim();
         if (url.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Introduce una URL válida.");
             return;
         }
-
         int maxVelocity = prefs.getMaxVelocity();
-
         String formatCode;
-        boolean isAudioMp3 = selectedItem.startsWith("mp3 |");
-
+        boolean isAudioMp3 = selectedItem.toLowerCase().contains("mp3");  // ← AQUEST ÉS EL CANVI CLAU
         if (isAudioMp3) {
             iniciarDescargaAudio(ytdlpPath, url, downloadPath, maxVelocity);
         } else {
             // ── Lògica per vídeo ───────────────────────────────
-            if (selectedItem.startsWith("best |")) {
+            if (selectedItem.startsWith("MEJOR |")) {
                 formatCode = "best";
-            } else if (selectedItem.startsWith("bestaudio")) {
-                formatCode = "bestaudio/best";
+            } else if (selectedItem.startsWith("MP4 |")) {
+                formatCode = "mp4";  // o el selector que vulguis
             } else {
-                // format concret (ex: 137 | 1080p ...)
                 formatCode = selectedItem.split("\\|")[0].trim();
             }
-
             iniciarDescarga(ytdlpPath, url, formatCode, downloadPath, maxVelocity);
         }
     

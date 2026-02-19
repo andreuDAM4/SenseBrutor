@@ -16,8 +16,6 @@ public class EstadoRenderer extends DefaultTableCellRenderer {
         // Llamamos al super para obtener el componente base
         Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
         
-        // 1. Obtenemos el valor de la columna "Estado" para ESTA fila concreta
-        // Tu columna de estado es la número 4
         Object estadoObj = table.getValueAt(row, 4);
         String estado = (estadoObj != null) ? estadoObj.toString() : "";
 

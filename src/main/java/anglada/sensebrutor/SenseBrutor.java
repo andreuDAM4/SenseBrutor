@@ -10,7 +10,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
-import javax.swing.JMenuItem;
 
 
 /**
@@ -23,7 +22,7 @@ public final class SenseBrutor extends javax.swing.JFrame {
     private final PreferencesPanel preferencesPanel;
     private final MediaFilePanel mediaFilePanel;
     private final LoginPanel loginPanel;
-
+    
     private final File sessionFile = new File("session/session.dat");
     /**
      * Creates new form SenseBrutor
@@ -31,6 +30,7 @@ public final class SenseBrutor extends javax.swing.JFrame {
     
     public SenseBrutor() {
         initComponents();
+        
         diMediaPolling.setVisible(false);
         preferencesPanel = new PreferencesPanel(this);
         downloadpanel = new DownloadPanel(this);

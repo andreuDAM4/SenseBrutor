@@ -18,7 +18,7 @@ public class PreferencesPanel extends javax.swing.JPanel {
     public PreferencesPanel(SenseBrutor mainFrame) {
         initComponents();
         this.mainFrame = mainFrame;
-        validarRutas();
+        inicializarRutasPorDefecto();
     }
     
     /*Serie de funcions necessaries per la descarrega*/
@@ -56,6 +56,32 @@ public class PreferencesPanel extends javax.swing.JPanel {
        jSpinnerVelocity.setValue(0);
        jCheckBoxM3u.setSelected(false);
    }
+   
+   private void inicializarRutasPorDefecto() {
+        // Carpeta por defecto (Downloads)
+        String defaultDownload = System.getProperty("user.home") + File.separator + "Downloads";
+
+        // Ruta por defecto yt-dlp
+        String defaultYtdlp = System.getProperty("user.home") + File.separator + "yt-dlp" + File.separator + "yt-dlp.exe";
+
+        // Solo si están vacíos (para no sobrescribir)
+        if (jTextFieldDownloadPath.getText().isEmpty()) {
+            jTextFieldDownloadPath.setText(defaultDownload);
+        }
+
+        File ytdlpFile = new File(defaultYtdlp);
+
+        if (jTextFieldPathYTDLP.getText().isEmpty()) {
+            if (ytdlpFile.exists() && ytdlpFile.isFile()) {
+                jTextFieldPathYTDLP.setText(defaultYtdlp);
+            } else {
+                jTextFieldPathYTDLP.setText(""); // no engañar al usuario
+            }
+        }
+
+        validarRutas();
+   }
+   
    private void validarRutas() {
         String pathDescarga = jTextFieldDownloadPath.getText().trim();
         String pathYtdlp = jTextFieldPathYTDLP.getText().trim();
