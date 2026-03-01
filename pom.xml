@@ -5,6 +5,28 @@
     <artifactId>SenseBrutor</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
+    <build> 
+        <plugins>
+            <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-javadoc-plugin</artifactId>
+            <version>3.11.2</version>
+            <configuration>
+                <outputDirectory>${project.basedir}/doc</outputDirectory>
+                <show>private</show>
+            </configuration>
+            <executions>
+                <execution>
+                  <id>generate-javadoc</id>
+                  <phase>package</phase>
+                  <goals>
+                      <goal>javadoc</goal>
+                  </goals>
+                </execution>
+            </executions>
+            </plugin>
+        </plugins> 
+    </build>
     <dependencies>
         <dependency>
             <groupId>tools.jackson.core</groupId>

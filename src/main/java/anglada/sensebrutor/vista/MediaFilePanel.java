@@ -17,10 +17,23 @@ import javax.swing.table.AbstractTableModel;
 import java.time.format.DateTimeFormatter;
 
 /**
- * Panel sempre visible que mostra els arxius de dins una carpeta on aniran les descargues.
- * Llista tots els arxius depenent d'els filtres seleccionats.
- * Permet cercar per nom amb temps real.
+ * Panell principal per gestionar la biblioteca de fitxers multimèdia.
+ * 
+ * Mostra tots els arxius disponibles tant locals com remots, unificant-los
+ * en una sola llista. Permet aplicar filtres per nom, tipus MIME i estat
+ * (LOCAL, REMOT o AMBOS).
+ * 
+ * També permet realitzar accions sobre els fitxers:
+ * - Reproduir arxius locals
+ * - Descarregar arxius remots
+ * - Pujar arxius al servidor
+ * - Eliminar arxius locals
+ * 
+ * Les dades es mantenen actualitzades automàticament mitjançant un listener
+ * del component de polling.
+ * 
  * @author Andreu
+ * @version 1.0
  */
 public class MediaFilePanel extends javax.swing.JPanel {
 
@@ -32,7 +45,15 @@ public class MediaFilePanel extends javax.swing.JPanel {
     private MediaTableModel tableModel;
     private DefaultListModel<String> mimeListModel;
     private DefaultComboBoxModel<String> filterModel;
-    
+    /**
+    * Constructor del panell de fitxers multimèdia.
+    * 
+    * Inicialitza la interfície, els models de dades i els listeners.
+    * També registra un listener per actualitzar automàticament la taula
+    * quan hi ha nous fitxers disponibles.
+    * 
+    * @param mainFrame finestra principal de l'aplicació
+    */
     public MediaFilePanel(SenseBrutor mainFrame) {
         this.mainFrame = mainFrame;
         this.diComponent = mainFrame.getDiMediaPolling();
@@ -57,7 +78,16 @@ public class MediaFilePanel extends javax.swing.JPanel {
         });
         carregarDades();
     }
-    
+    /**
+    * Inicialitza els models de dades de la taula i els filtres.
+    * 
+    * Configura:
+    * - El model de la taula
+    * - Les columnes i amplades
+    * - El model de la llista de tipus MIME
+    * - El model del combo de filtres d'estat
+    * - El renderer personalitzat per pintar les files segons l'estat
+    */
     private void setupModels() {
          // Asignar AbstractTableModel
         tableModel = new MediaTableModel();
@@ -87,7 +117,16 @@ public class MediaFilePanel extends javax.swing.JPanel {
         jButtonPlay.setOpaque(true);
     }
     
-    
+    /**
+    * Configura els listeners dels components de la interfície.
+    * 
+    * Inclou:
+    * - Cerca en temps real per nom
+    * - Filtrat per tipus MIME
+    * - Gestió de selecció de files de la taula
+    * 
+    * També actualitza els botons segons l'estat del fitxer seleccionat.
+    */
     private void setupListeners() {
         // Cerca en temps real
         jTextFieldBuscar.getDocument().addDocumentListener(new DocumentListener() {
@@ -144,8 +183,12 @@ public class MediaFilePanel extends javax.swing.JPanel {
         });
     }
     
-    // Actualiza la llista de tipus MIME disponibles a la interfaç
-    // Recorre tots els fitxers, obte tipus, ordena y elimina duplicats
+    /**
+    * Actualitza la llista de tipus MIME disponibles.
+    * 
+    * Recorre tots els fitxers carregats, obté els seus tipus MIME,
+    * elimina duplicats i els ordena alfabèticament.
+    */
     private void actualizarMimeList() {
         mimeListModel.clear();
 
@@ -166,7 +209,11 @@ public class MediaFilePanel extends javax.swing.JPanel {
         }
     }
     
-    //Carrega sa biblioteca de medis a l'hora de seleccionar una carpeta de sortida
+    /**
+    * Recarrega les dades només si hi ha una carpeta de descàrrega configurada.
+    * 
+    * Comprova que la ruta existeix i és un directori vàlid abans de carregar dades.
+    */
     public void reloadIfConfigured() {
         String path = mainFrame.getPreferencesPanel().getDownloadPath();
         if (path != null && !path.isEmpty()) {
@@ -178,8 +225,16 @@ public class MediaFilePanel extends javax.swing.JPanel {
     } 
 
     /**
-    * Funció per mostrar els arxius a la taula.
-    * Carrega tots els arxius de manera unificada, combinant arxius locals i remots.
+    * Carrega tots els fitxers disponibles (locals i remots).
+    * 
+    * Unifica la informació en una sola estructura de dades combinant:
+    * - Fitxers locals del sistema
+    * - Fitxers remots del servidor
+    * 
+    * Si un fitxer existeix tant localment com remotament,
+    * es marca amb l'estat AMBOS.
+    * 
+    * Finalment actualitza els filtres i la taula.
     */
     private void carregarDades() {
         allMedia.clear();
@@ -256,8 +311,15 @@ public class MediaFilePanel extends javax.swing.JPanel {
     }
 
     /**
-     * Funció per filtrar arxius segons la recerca, estat i tipus MIME seleccionats
-     */
+    * Aplica els filtres seleccionats per l'usuari.
+    * 
+    * Permet filtrar per:
+    * - Nom del fitxer (cerca)
+    * - Estat (LOCAL, REMOT, AMBOS o Tots)
+    * - Tipus MIME
+    * 
+    * Actualitza la taula amb els resultats filtrats.
+    */
     private void applyFilters() {
         //Obtenir els filtres seleccionats per l'usuari
         String textBusqueda = jTextFieldBuscar.getText().toLowerCase();
@@ -287,8 +349,11 @@ public class MediaFilePanel extends javax.swing.JPanel {
     }
 
     /**
-     * Funció per eliminar l'arxiu seleccionat de la taula i del disc
-     */
+    * Elimina el fitxer seleccionat de la taula i del disc.
+    * 
+    * Mostra un diàleg de confirmació abans d'eliminar el fitxer.
+    * Després d'eliminar-lo, recarrega les dades per actualitzar la vista.
+    */
     private void deleteSelectedFile() {
         int filaSeleccionada = jTable.getSelectedRow();
         if (filaSeleccionada == -1) {
@@ -329,8 +394,13 @@ public class MediaFilePanel extends javax.swing.JPanel {
     }
 
     /**
-     * Funció per descarregar l'arxiu seleccionat
-     */
+    * Descarrega el fitxer seleccionat des del servidor.
+    * 
+    * Executa la descàrrega en un fil separat i mostra una barra de càrrega
+    * mentre dura el procés.
+    * 
+    * Després de completar la descàrrega, actualitza la taula.
+    */
     private void downloadSelectedFile() {
         if (!validarCarpetaDescarga()) return;
         int filaSeleccionada = jTable.getSelectedRow();
@@ -360,6 +430,14 @@ public class MediaFilePanel extends javax.swing.JPanel {
             }
         }).start();
     }
+    /**
+    * Activa o desactiva l'indicador de càrrega.
+    * 
+    * També bloqueja o desbloqueja els controls de la interfície
+    * per evitar accions durant processos en execució.
+    * 
+    * @param active indica si la càrrega està activa
+    */
     private void toggleLoading(boolean active) {
         SwingUtilities.invokeLater(() -> {
             jProgressBar.setVisible(active);
@@ -374,8 +452,11 @@ public class MediaFilePanel extends javax.swing.JPanel {
     }
 
     /**
-     * Funció per pujar l'arxiu seleccionat al servidor
-     */
+    * Puja el fitxer seleccionat al servidor.
+    * 
+    * Executa l'operació en segon pla i mostra una barra de càrrega.
+    * Després d'acabar, actualitza la taula.
+    */
     private void uploadSelectedFile() {
         int filaSeleccionada = jTable.getSelectedRow();
         if (filaSeleccionada == -1) return;
@@ -409,8 +490,10 @@ public class MediaFilePanel extends javax.swing.JPanel {
     }
 
     /**
-     * Funció per reproduir un arxiu seleccionat
-     */
+    * Reprodueix el fitxer seleccionat utilitzant l'aplicació per defecte del sistema.
+    * 
+    * Només es pot reproduir si el fitxer existeix localment.
+    */
     private void playSelectedFile() {
         int filaSeleccionada = jTable.getSelectedRow();
         if (filaSeleccionada == -1) {
@@ -437,13 +520,20 @@ public class MediaFilePanel extends javax.swing.JPanel {
     }
 
     /**
-     * Classe interna per personalitzar la taula de fitxers
-     */
+    * Model de taula personalitzat per mostrar els fitxers multimèdia.
+    * 
+    * Converteix els objectes UnifiedMediaModel en files de la taula,
+    * mostrant informació com nom, mida, tipus MIME, data i estat.
+    */
     private class MediaTableModel extends AbstractTableModel {
         private List<UnifiedMediaModel> data = new ArrayList<>();
         private final String[] cols = { "Nombre", "Tamaño", "MIME", "Fecha", "Estado" };
 
-        // Actualitzar dades de la taula
+        /**
+        * Actualitza les dades de la taula.
+        * 
+        * @param newData nova llista de fitxers a mostrar
+        */
         public void updateData(List<UnifiedMediaModel> newData) {
             this.data = new ArrayList<>(newData);
             fireTableDataChanged(); // Notificar la taula que ha canviat
@@ -452,7 +542,13 @@ public class MediaFilePanel extends javax.swing.JPanel {
         @Override public int getRowCount() { return data.size(); }
         @Override public int getColumnCount() { return cols.length; }
         @Override public String getColumnName(int col) { return cols[col]; }
-
+        /**
+        * Retorna el valor que s'ha de mostrar en una cel·la concreta.
+        * 
+        * @param fila índex de la fila
+        * @param columna índex de la columna
+        * @return valor a mostrar a la cel·la
+        */
         @Override
         public Object getValueAt(int fila, int columna) {
             UnifiedMediaModel media = data.get(fila);
@@ -482,7 +578,14 @@ public class MediaFilePanel extends javax.swing.JPanel {
             }
         }
     }
-    //Controla l'error de si no tenim a preferences panel la ruta de la carpeta descarregues
+    /**
+    * Valida la carpeta de descàrrega configurada.
+    * 
+    * Comprova que existeix i és un directori vàlid.
+    * Si no existeix, intenta crear-la.
+    * 
+    * @return true si la carpeta és vàlida, false en cas contrari
+    */
     private boolean validarCarpetaDescarga() {
         String rutaDescarga = mainFrame.getPreferencesPanel().getDownloadPath();
 
@@ -520,7 +623,14 @@ public class MediaFilePanel extends javax.swing.JPanel {
 
         return true;
     }
-    //Funcio que serveix per mostrar es pes de s'arxiu amb un format segons sa mida
+    /**
+    * Converteix una mida en bytes a un format llegible.
+    * 
+    * Mostra el valor en B, KB o MB segons la mida.
+    * 
+    * @param bytes mida en bytes
+    * @return cadena amb la mida formatejada
+    */
     private String formatSize(long bytes) {
         if (bytes < 1024) return bytes + " B";
         if (bytes < 1024 * 1024) return String.format("%.1f KB", bytes / 1024.0);
@@ -634,19 +744,35 @@ public class MediaFilePanel extends javax.swing.JPanel {
         add(jProgressBar);
         jProgressBar.setBounds(20, 340, 500, 20);
     }// </editor-fold>//GEN-END:initComponents
-
+    /**
+    * Gestor de l'esdeveniment del ComboBox de filtre.
+    * S'executa quan l'usuari canvia el tipus de filtre seleccionat.
+    * Aplica els filtres actuals a la llista de fitxers.
+    */
     private void jComboBoxFilterActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBoxFilterActionPerformed
         applyFilters();
     }//GEN-LAST:event_jComboBoxFilterActionPerformed
-
+    /**
+    * Gestor de l'esdeveniment del botó d'actualitzar.
+    * Torna a carregar totes les dades de la biblioteca de medis.
+    */
     private void jButtonRefreshActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonRefreshActionPerformed
         carregarDades();
     }//GEN-LAST:event_jButtonRefreshActionPerformed
-
+    /**
+    * Gestor de l'esdeveniment del botó d'eliminar.
+    * Elimina el fitxer seleccionat de la taula i del sistema.
+    */
     private void jButtonDeleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDeleteActionPerformed
         deleteSelectedFile();
     }//GEN-LAST:event_jButtonDeleteActionPerformed
-
+    /**
+    * Gestor de l'esdeveniment del botó principal (Play/Subir/Descargar).
+    * Executa una acció diferent segons l'estat del fitxer seleccionat:
+    * - LOCAL: puja el fitxer al servidor
+    * - REMOTO: descarrega el fitxer
+    * - AMBOS: reprodueix el fitxer
+    */
     private void jButtonPlayActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonPlayActionPerformed
         int selectedRow = jTable.getSelectedRow();
         if (selectedRow == -1) return;

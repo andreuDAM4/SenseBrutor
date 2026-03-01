@@ -1,22 +1,29 @@
 package anglada.sensebrutor.model;
-
-/**
- * Clase que donat un arxiu retorna nom, ruta, pes, tipus i data
- * @author Andreu
- */
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-
+/**
+ * Model que representa un fitxer multimèdia i proporciona informació bàsica
+ * sobre ell, com el nom, la ruta absoluta, la mida, el tipus MIME i la data
+ * de la última modificació.
+ * 
+ * @author Andreu
+ */
 public class MediaFileModel {
     private final String name;
     private final String path;
     private final long size;
     private final String mimeType;
     private final LocalDateTime date;
-
+    /**
+     * Crea un MediaFileModel a partir d'un fitxer.
+     * Recupera el nom, la ruta absoluta, la mida en bytes, el tipus MIME
+     * (o "unknown" si no es pot detectar) i la data de última modificació.
+     * 
+     * @param file El fitxer del qual es vol obtenir la informació.
+     */
     public MediaFileModel(File file) {
         this.name = file.getName();
         this.path = file.getAbsolutePath();
@@ -38,7 +45,6 @@ public class MediaFileModel {
             ZoneId.systemDefault()
         );
     }
-
     public String getName() { return name; }
     public String getPath() { return path; }
     public long getSize() { return size; }

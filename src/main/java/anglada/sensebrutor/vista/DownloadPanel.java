@@ -15,16 +15,25 @@ import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 
 /**
- *
+ * Panell de descàrrega de vídeos o àudio utilitzant yt-dlp.
+ * Permet seleccionar el format, iniciar la descàrrega i reproduir l'arxiu descarregat.
+ * 
+ * Gestiona processos en segon pla mitjançant SwingWorker i mostra el progrés de la descàrrega.
+ * 
  * @author Andreu
+ * @version 1.0
  */
 public class DownloadPanel extends javax.swing.JPanel {
 
-    /**
-     * Creates new form DownloadPanel
-     */
+    /** Referència a la finestra principal de l'aplicació */
     private final SenseBrutor mainFrame;
+    /** Ruta de l'arxiu descarregat per poder-lo reproduir posteriorment */
     private String downloadedFilePath;
+    /**
+    * Constructor del panell de descàrrega.
+    * 
+    * @param mainFrame finestra principal de l'aplicació
+    */
     public DownloadPanel(SenseBrutor mainFrame) {
         this.mainFrame = mainFrame;
 
@@ -108,9 +117,9 @@ public class DownloadPanel extends javax.swing.JPanel {
         add(jButtonDownload);
         jButtonDownload.setBounds(190, 190, 190, 50);
         add(jProgressBarDownload);
-        jProgressBarDownload.setBounds(130, 270, 300, 30);
+        jProgressBarDownload.setBounds(130, 270, 330, 30);
         add(jLabelProgress);
-        jLabelProgress.setBounds(260, 250, 90, 16);
+        jLabelProgress.setBounds(270, 250, 90, 16);
 
         jButtonPlay.setBackground(new java.awt.Color(204, 255, 204));
         jButtonPlay.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
@@ -132,10 +141,15 @@ public class DownloadPanel extends javax.swing.JPanel {
         jLabelLoadFormat.setBounds(240, 250, 140, 16);
     }// </editor-fold>//GEN-END:initComponents
     
-    // Método simple per extreure el porcentge de descarrega la línea de yt-dlp per despres posar dins el progress bar
     /**
      * Font https://openai.com/es-ES/
      */
+    /**
+    * Extreu el percentatge de descàrrega a partir d'una línia de sortida de yt-dlp.
+    * 
+    * @param line línia de text generada pel procés de descàrrega
+    * @return percentatge arrodonit (0-100) o null si no es pot interpretar
+    */
     private Integer parsePercentage(String line) {
         try {
             line = line.trim();
@@ -151,7 +165,13 @@ public class DownloadPanel extends javax.swing.JPanel {
         return null;
     }
     /**
-    * Inicia la descàrrega només d'àudio i el converteix a MP3
+    * Inicia la descàrrega només d'àudio i el converteix a format MP3.
+    * Executa el procés en segon pla i actualitza la barra de progrés.
+    * 
+    * @param ytdlpPath ruta a l'executable de yt-dlp
+    * @param url URL del vídeo a descarregar
+    * @param downloadPath carpeta de destí de la descàrrega
+    * @param maxVelocity velocitat màxima de descàrrega en KB/s
     */
    private void iniciarDescargaAudio(String ytdlpPath, String url, String downloadPath, int maxVelocity) {
        jProgressBarDownload.setVisible(true);
@@ -284,8 +304,13 @@ public class DownloadPanel extends javax.swing.JPanel {
        worker.execute();
    }
     /**
-    * Acció del botó descarregar: inclou barra de progrés i assigna downloadedFilePath
-    * un cop finalitzat, per poder reproduir el fitxer descarregat.
+    * Inicia la descàrrega de vídeo o àudio segons el format seleccionat.
+    * 
+    * @param ytdlpPath ruta a l'executable de yt-dlp
+    * @param url URL del vídeo
+    * @param formatCode codi de format seleccionat
+    * @param downloadPath carpeta de destí
+    * @param maxVelocity velocitat màxima en KB/s
     */
     private void iniciarDescarga(String ytdlpPath, String url, String formatCode, String downloadPath, int maxVelocity) {
         jProgressBarDownload.setVisible(true);
@@ -418,7 +443,12 @@ public class DownloadPanel extends javax.swing.JPanel {
 
         worker.execute();
     }
-    
+    /**
+    * Acció del botó de descàrrega.
+    * Valida les dades introduïdes i inicia la descàrrega amb el format seleccionat.
+    * 
+    * @param evt esdeveniment d'acció
+    */
     private void jButtonDownloadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDownloadActionPerformed
         jButtonPlay.setVisible(false);
         PreferencesPanel prefs = mainFrame.getPreferencesPanel();
@@ -464,7 +494,11 @@ public class DownloadPanel extends javax.swing.JPanel {
     
     }//GEN-LAST:event_jButtonDownloadActionPerformed
     
-    //Una vegada esta decarregat l'arxiu permet obrir i reproduir
+    /**
+    * Permet obrir i reproduir l'arxiu descarregat amb el reproductor per defecte.
+    * 
+    * @param evt esdeveniment d'acció
+    */
     private void jButtonPlayActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonPlayActionPerformed
         if (downloadedFilePath != null) {
             try {
@@ -475,12 +509,12 @@ public class DownloadPanel extends javax.swing.JPanel {
         }
     }//GEN-LAST:event_jButtonPlayActionPerformed
     
-    //Carrega els formats disponibles de la URL
     /**
      * Codi d'ajuda generat per la font https://openai.com/es-ES/
      */
     /**
-    * Carrega formats disponibles de la URL, però només mostra opcions útils i clares per l'usuari
+    * Carrega els formats disponibles per a la URL introduïda.
+    * En aquesta implementació es mostren opcions predefinides per simplicitat.
     */
     private void loadFormats() {
         PreferencesPanel prefs = mainFrame.getPreferencesPanel();
@@ -547,7 +581,11 @@ public class DownloadPanel extends javax.swing.JPanel {
     }
     
    
-    //Fa disponible el boto de descarregar una vegada s'ha seleccionat un format
+    /**
+    * Activa o desactiva el botó de descàrrega segons si hi ha un format seleccionat.
+    * 
+    * @param evt esdeveniment d'acció
+    */
     private void jComboBoxFormatActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBoxFormatActionPerformed
         //Los pongo invisibles por si se vuelva a elegir otra url
         
@@ -557,7 +595,12 @@ public class DownloadPanel extends javax.swing.JPanel {
             jButtonDownload.setEnabled(false);
         }
     }//GEN-LAST:event_jComboBoxFormatActionPerformed
-
+    /**
+    * Es llança quan el camp URL perd el focus.
+    * Reinicia l'estat i carrega els formats disponibles.
+    * 
+    * @param evt esdeveniment de focus
+    */
     private void jTextFieldURLFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_jTextFieldURLFocusLost
         jLabelProgress.setVisible(false);
         jButtonPlay.setVisible(false);

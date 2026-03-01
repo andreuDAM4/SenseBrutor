@@ -127,14 +127,14 @@
     <Component class="javax.swing.JProgressBar" name="jProgressBarDownload">
       <Constraints>
         <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout" value="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout$AbsoluteConstraintsDescription">
-          <AbsoluteConstraints x="130" y="270" width="300" height="30"/>
+          <AbsoluteConstraints x="130" y="270" width="330" height="30"/>
         </Constraint>
       </Constraints>
     </Component>
     <Component class="javax.swing.JLabel" name="jLabelProgress">
       <Constraints>
         <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout" value="org.netbeans.modules.form.compat2.layouts.DesignAbsoluteLayout$AbsoluteConstraintsDescription">
-          <AbsoluteConstraints x="260" y="250" width="90" height="16"/>
+          <AbsoluteConstraints x="270" y="250" width="90" height="16"/>
         </Constraint>
       </Constraints>
     </Component>

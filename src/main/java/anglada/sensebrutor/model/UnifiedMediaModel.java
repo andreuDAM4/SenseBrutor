@@ -3,15 +3,26 @@ package anglada.sensebrutor.model;
 import anglada.dimedianetpollingcomponent.model.Media;
 import java.io.File;
 import java.time.LocalDateTime;
-
+/**
+ * Model unificat que representa un fitxer multimèdia que pot existir
+ * localment, de forma remota o ambdós. Proporciona informació bàsica com
+ * nom, mida, tipus MIME, data, i l’estat de la ubicació.
+ * 
+ * @author Andreu
+ */
 public class UnifiedMediaModel {
-
+    /**
+     * Estat del fitxer multimèdia.
+     * LOCAL: només existeix localment.
+     * REMOTO: només existeix en el servidor.
+     * AMBOS: existeix tant localment com en el servidor.
+     */
     public enum Estado {
         LOCAL,
         REMOTO,
         AMBOS
     }
-
+    
     private String nombre;
     private long size;
     private String mime;

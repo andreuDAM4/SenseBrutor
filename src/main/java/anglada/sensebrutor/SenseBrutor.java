@@ -13,7 +13,10 @@ import java.nio.file.Files;
 
 
 /**
- *
+ * Classe principal de l'aplicació SenseBrutor.
+ * Gestiona la finestra principal i la navegació entre panels,
+ * així com la gestió de la sessió de l'usuari.
+ * 
  * @author Andreu
  */
 public final class SenseBrutor extends javax.swing.JFrame {
@@ -22,12 +25,11 @@ public final class SenseBrutor extends javax.swing.JFrame {
     private final PreferencesPanel preferencesPanel;
     private final MediaFilePanel mediaFilePanel;
     private final LoginPanel loginPanel;
-    
     private final File sessionFile = new File("session/session.dat");
     /**
-     * Creates new form SenseBrutor
+     * Constructor principal.
+     * Inicialitza els components, panels i comprova si hi ha una sessió guardada.
      */
-    
     public SenseBrutor() {
         initComponents();
         
@@ -36,20 +38,8 @@ public final class SenseBrutor extends javax.swing.JFrame {
         downloadpanel = new DownloadPanel(this);
         mediaFilePanel = new MediaFilePanel(this);
         loginPanel = new LoginPanel(this);
-        
-        /*JMenuItem logoutItem = new JMenuItem("Cerrar sesión");
-        logoutItem.addActionListener(e -> {
-            borrarSesion();   // borra archivo
-            this.jwt = "";    // borra token en memoria
-            loginPanel.limpiar();
-            preferencesPanel.reiniciar(); // neteja configuració
-            mostrarLogin();
-        });
-        jMenuFile.insert(logoutItem, 0);*/
-
         downloadpanel.setBounds(0, 0, 500, 440);
         mediaFilePanel.setBounds(0, 0, 550, 440);
-        //mediaFilePanel.setBounds(500, 0, 550, 340);
         preferencesPanel.setBounds(0, 0, 500, 440);
         loginPanel.setBounds(0, 0, 500, 440);
 
@@ -84,7 +74,11 @@ public final class SenseBrutor extends javax.swing.JFrame {
         }
     }
 
-    // Guard Token en un fitxer
+    /**
+     * Guarda el token de sessió dins un fitxer.
+     * 
+     * @param token token JWT a guardar
+     */
     public void guardarSesion(String token) {
         try {
             //Crei carpeta si es necesari
@@ -96,7 +90,11 @@ public final class SenseBrutor extends javax.swing.JFrame {
             e.printStackTrace();
         }
     }
-    //Si existeix es fitxer intent llegir-lo
+    /**
+     * Llegeix el token de sessió des del fitxer.
+     * 
+     * @return el token guardat o cadena buida si no existeix
+     */
     public String leerSesion() {
         try {
             if (!sessionFile.exists()) return "";
@@ -106,22 +104,30 @@ public final class SenseBrutor extends javax.swing.JFrame {
         }
     }
     
-    //Quan es pitja cerrar sesion o quan ha expirat s'esborra fitxer
+    /**
+     * Esborra el fitxer de sessió si existeix.
+     */
     public void borrarSesion() {
         if (sessionFile.exists()) sessionFile.delete();
     }
     
-    //Quan hi ha login panel deshabilitam opcions del menu
+    /**
+     * Activa o desactiva les opcions del menú.
+     * 
+     * @param enabled true per activar, false per desactivar
+     */
     private void setMenusEnabled(boolean enabled) {
         jMenuItemDownload.setEnabled(enabled);
         jMenuItemServidor.setEnabled(enabled);
         jMenuItemPreferences.setEnabled(enabled);
         jMenuItemLogout.setEnabled(enabled);
-
+        // Sempre disponibles
         jMenuItemExit.setEnabled(true);
         jMenuItemAbout.setEnabled(true);
     }
-    
+    /**
+     * Mostra el panel de login i desactiva els menús.
+     */
     public void mostrarLogin() {
         downloadpanel.setVisible(false);
         mediaFilePanel.setVisible(false);
@@ -131,6 +137,10 @@ public final class SenseBrutor extends javax.swing.JFrame {
         setMenusEnabled(false);
 
     }
+    /**
+     * Executa accions després d'un login correcte.
+     * Mostra el panel principal i activa els menús.
+     */
     public void loginCorrecto() {
         loginPanel.setVisible(false);
         downloadpanel.setVisible(true);
@@ -141,16 +151,34 @@ public final class SenseBrutor extends javax.swing.JFrame {
         setMenusEnabled(true);
 
     }
+    /**
+     * Mostra el panel de descàrregues.
+     */
     public void mostrarDownloadPanel() {
         preferencesPanel.setVisible(false);
         downloadpanel.setVisible(true);
     }
+    /**
+     * Retorna el panel de preferències.
+     * 
+     * @return PreferencesPanel
+     */
     public PreferencesPanel getPreferencesPanel() {
         return preferencesPanel;
     }
+    /**
+     * Retorna el panel de fitxers multimèdia.
+     * 
+     * @return MediaFilePanel
+     */
     public MediaFilePanel getMediaFilePanel() {
         return mediaFilePanel;
     }
+    /**
+     * Retorna el component de polling del servidor.
+     * 
+     * @return DIMediaNetPollingComponent
+     */
     public DIMediaNetPollingComponent getDiMediaPolling() {
         return diMediaPolling;
     }
@@ -262,36 +290,60 @@ public final class SenseBrutor extends javax.swing.JFrame {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
-
+    /**
+     * Tanca l'aplicació quan es selecciona "Salir" al menú.
+     * 
+     * @param evt Event d'acció del JMenuItem
+     */
     private void jMenuItemExitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemExitActionPerformed
         System.exit(0);
     }//GEN-LAST:event_jMenuItemExitActionPerformed
-
+    /**
+     * Mostra el panel de configuració quan es selecciona "Configuración".
+     * 
+     * @param evt Event d'acció del JMenuItem
+     */
     private void jMenuItemPreferencesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemPreferencesActionPerformed
         downloadpanel.setVisible(false);
         preferencesPanel.setVisible(true);
         mediaFilePanel.setVisible(false);
     }//GEN-LAST:event_jMenuItemPreferencesActionPerformed
-
+    /**
+     * Mostra el diàleg "Acerca de..." amb informació de l'autor i recursos.
+     * 
+     * @param evt Event d'acció del JMenuItem
+     */
     private void jMenuItemAboutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemAboutActionPerformed
 
         jDialogAbout.setModal(true);
         jDialogAbout.setLocationRelativeTo(this);
         jDialogAbout.setVisible(true);
     }//GEN-LAST:event_jMenuItemAboutActionPerformed
-
+    /**
+     * Mostra el panel de biblioteca de mitjans quan es selecciona "Biblioteca de Medios".
+     * 
+     * @param evt Event d'acció del JMenuItem
+     */
     private void jMenuItemServidorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemServidorActionPerformed
         downloadpanel.setVisible(false);
         preferencesPanel.setVisible(false);
         mediaFilePanel.setVisible(true);
     }//GEN-LAST:event_jMenuItemServidorActionPerformed
-
+    /**
+     * Mostra el panel de descàrregues quan es selecciona "Descargar".
+     * 
+     * @param evt Event d'acció del JMenuItem
+     */
     private void jMenuItemDownloadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemDownloadActionPerformed
         downloadpanel.setVisible(true);
         preferencesPanel.setVisible(false);
         mediaFilePanel.setVisible(false);
     }//GEN-LAST:event_jMenuItemDownloadActionPerformed
-
+    /**
+     * Tanca la sessió actual, esborra el token i mostra el login.
+     * 
+     * @param evt Event d'acció del JMenuItem
+     */
     private void jMenuItemLogoutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemLogoutActionPerformed
         borrarSesion();   // borra archivo
         this.jwt = "";    // borra token en memoria
@@ -301,7 +353,9 @@ public final class SenseBrutor extends javax.swing.JFrame {
     }//GEN-LAST:event_jMenuItemLogoutActionPerformed
 
     /**
-     * @param args the command line arguments
+     * Punt d'entrada de l'aplicació.
+     * 
+     * @param args arguments de línia de comandes (no utilitzats)
      */
     public static void main(String args[]) {
         

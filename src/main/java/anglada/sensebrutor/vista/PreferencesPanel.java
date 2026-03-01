@@ -6,57 +6,90 @@ import java.io.File;
 import javax.swing.JFileChooser;
 
 /**
- *
+ * Panell de configuració de l'aplicació.
+ * Permet definir la carpeta de descàrrega, la ruta de yt-dlp,
+ * la velocitat màxima i si es vol crear un arxiu .m3u.
+ * 
  * @author Andreu
+ * @version 1.0
  */
 public class PreferencesPanel extends javax.swing.JPanel {
 
-    /**
-     * Creates new form PreferencesPanel
-     */
+    
     private final SenseBrutor mainFrame;
+    /**
+     * Constructor del panell de preferències.
+     * Inicialitza els components i estableix les rutes per defecte.
+     *
+     * @param mainFrame finestra principal de l'aplicació
+     */
     public PreferencesPanel(SenseBrutor mainFrame) {
         initComponents();
         this.mainFrame = mainFrame;
         inicializarRutasPorDefecto();
     }
     
-    /*Serie de funcions necessaries per la descarrega*/
+    /**
+     * 
+     * Obté la ruta de descàrrega configurada.
+     *
+     * @return ruta de descàrrega
+     */
     public String getDownloadPath() {
         return jTextFieldDownloadPath.getText().trim();
     }
-
+    /**
+     * Obté la ruta de l'executable yt-dlp.
+     *
+     * @return ruta de yt-dlp
+     */
     public String getYTDLPPath() {
         return jTextFieldPathYTDLP.getText().trim();
     }
-
+    /**
+     * Obté la velocitat màxima de descàrrega.
+     *
+     * @return velocitat en KB/s (0 = il·limitat)
+     */
     public int getMaxVelocity() {
         return (Integer) jSpinnerVelocity.getValue();
     }
-
+    /**
+     * Indica si s'ha de crear un arxiu M3U.
+     *
+     * @return true si està activat, false si no
+     */
     public boolean isCreateM3U() {
         return jCheckBoxM3u.isSelected();
     }
     
-    //Funcio necessaria a l'hora d'apretar descargar sense tenir definit ruta sortida
+     /**
+     * Obrir el selector per elegir la carpeta de descàrrega.
+     */
     public void elegirCarpetaDescarga() {
         jButtonDownloadPathActionPerformed(null);
     }
     
-    //Funcio necessaria a l'hora d'agregar formats
+    /**
+     * Obrir el selector per elegir el fitxer yt-dlp.
+     */
     public void elegirArchivoYTDLP() {
         jButtonPathYTDLPActionPerformed(null);
     }
     /**
-    * Reinicia tots els camps del PreferencesPanel a valors per defecte.
-    */
+     * Reinicia tots els camps del PreferencesPanel a valors per defecte.
+     */
    public void reiniciar() {
        jTextFieldDownloadPath.setText("");
        jTextFieldPathYTDLP.setText("");
        jSpinnerVelocity.setValue(0);
        jCheckBoxM3u.setSelected(false);
    }
-   
+   /**
+    * 
+    * Inicialitza les rutes per defecte si els camps estan buits.
+    * Defineix la carpeta Downloads i la possible ruta de yt-dlp.
+    */
    private void inicializarRutasPorDefecto() {
         // Carpeta por defecto (Downloads)
         String defaultDownload = System.getProperty("user.home") + File.separator + "Downloads";
@@ -81,7 +114,11 @@ public class PreferencesPanel extends javax.swing.JPanel {
 
         validarRutas();
    }
-   
+   /**
+    * 
+    * Valida les rutes introduïdes i mostra feedback visual.
+    * Marca en vermell si la ruta no existeix o és incorrecta.
+    */
    private void validarRutas() {
         String pathDescarga = jTextFieldDownloadPath.getText().trim();
         String pathYtdlp = jTextFieldPathYTDLP.getText().trim();
@@ -201,7 +238,12 @@ public class PreferencesPanel extends javax.swing.JPanel {
         jLabelTitlePreferences.setBounds(150, 20, 320, 50);
     }// </editor-fold>//GEN-END:initComponents
     
-    //FileChooser que permet navegar i seleccionar una ruta directori
+    /**
+     * Gestor del botó per seleccionar la carpeta de descàrrega.
+     * Obri un JFileChooser i actualitza la ruta seleccionada.
+     *
+     * @param evt esdeveniment del botó
+     */
     private void jButtonDownloadPathActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDownloadPathActionPerformed
         jFileChooserGeneral.setDialogTitle("Selecciona la carpeta de descarga");
         jFileChooserGeneral.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
@@ -217,7 +259,12 @@ public class PreferencesPanel extends javax.swing.JPanel {
         }
     }//GEN-LAST:event_jButtonDownloadPathActionPerformed
     
-    //FileChooser que permet navegar i seleccionar una ruta arxiu
+    /**
+     * Gestor del botó per seleccionar el fitxer yt-dlp.
+     * Obri un JFileChooser i actualitza la ruta seleccionada.
+     *
+     * @param evt esdeveniment del botó
+     */
     private void jButtonPathYTDLPActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonPathYTDLPActionPerformed
         jFileChooserGeneral.setDialogTitle("Selecciona el archivo de yt-dlp");
         jFileChooserGeneral.setFileSelectionMode(JFileChooser.FILES_ONLY);

@@ -6,19 +6,36 @@ import anglada.sensebrutor.SenseBrutor;
 import javax.swing.*;
 import java.awt.*;
 import java.net.URL;
-
+/**
+ * Panell d'inici de sessió de l'aplicació.
+ * 
+ * Permet a l'usuari introduir el correu electrònic i la contrasenya
+ * per autenticar-se. També ofereix l'opció de recordar la sessió.
+ * 
+ * Mostra feedback visual durant el procés de login mitjançant un spinner
+ * i missatges d'estat.
+ * 
+ * @author Andreu
+ * @version 1.0
+ */
 public class LoginPanel extends JPanel {
-
+    /** Referència a la finestra principal de l'aplicació */
     private final SenseBrutor main;
+    /** Component encarregat de gestionar el polling i el login */
     private final DIMediaNetPollingComponent component;
     private JTextField emailField;
     private JPasswordField passwordField;
+    /** Checkbox per recordar la sessió */
     private JCheckBox rememberCheck;
     private JButton loginButton;
     private JLabel statusLabel;
     private JLabel logoLabel;
     private JLabel spinnerLabel; // JLabel para el GIF de carga
-
+    /**
+     * Constructor del panell de login.
+     * 
+     * @param main finestra principal de l'aplicació
+     */
     public LoginPanel(SenseBrutor main) {
         this.main = main;
         this.component = main.getDiMediaPolling();
@@ -32,7 +49,10 @@ public class LoginPanel extends JPanel {
             }
         });
     }
-
+    /**
+     * Inicialitza la interfície gràfica del panell.
+     * Crea i posiciona tots els components visuals.
+     */
     private void initUI() {
         setLayout(null);
         setBackground(new Color(240, 240, 240));
@@ -98,7 +118,12 @@ public class LoginPanel extends JPanel {
             add(logoLabel);
         }
     }
-
+    /**
+     * Intenta iniciar sessió amb les credencials introduïdes.
+     * 
+     * Valida els camps, mostra feedback visual i executa el procés
+     * de login en un fil separat per no bloquejar la interfície.
+     */
     private void intentarLogin() {
         String email = emailField.getText().trim();
         String password = new String(passwordField.getPassword()).trim();
@@ -151,7 +176,9 @@ public class LoginPanel extends JPanel {
             }
         }).start();
     }
-
+    /**
+     * Neteja els camps del formulari i restableix l'estat del panell.
+     */
     public void limpiar() {
         emailField.setText("");
         passwordField.setText("");
