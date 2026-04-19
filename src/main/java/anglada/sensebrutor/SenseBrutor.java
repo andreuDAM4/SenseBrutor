@@ -1,0 +1,383 @@
+
+package anglada.sensebrutor;
+
+import anglada.dimedianetpollingcomponent.DIMediaNetPollingComponent;
+import anglada.sensebrutor.vista.MediaFilePanel;
+import anglada.sensebrutor.vista.DownloadPanel;
+import anglada.sensebrutor.vista.LoginPanel;
+import anglada.sensebrutor.vista.PreferencesPanel;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.Files;
+
+
+/**
+ * Classe principal de l'aplicació SenseBrutor.
+ * Gestiona la finestra principal i la navegació entre panels,
+ * així com la gestió de la sessió de l'usuari.
+ * 
+ * @author Andreu
+ */
+public final class SenseBrutor extends javax.swing.JFrame {
+    public String jwt = "";
+    private final DownloadPanel downloadpanel;
+    private final PreferencesPanel preferencesPanel;
+    private final MediaFilePanel mediaFilePanel;
+    private final LoginPanel loginPanel;
+    private final File sessionFile = new File("session/session.dat");
+    /**
+     * Constructor principal.
+     * Inicialitza els components, panels i comprova si hi ha una sessió guardada.
+     */
+    public SenseBrutor() {
+        initComponents();
+        
+        diMediaPolling.setVisible(false);
+        preferencesPanel = new PreferencesPanel(this);
+        downloadpanel = new DownloadPanel(this);
+        mediaFilePanel = new MediaFilePanel(this);
+        loginPanel = new LoginPanel(this);
+        downloadpanel.setBounds(0, 0, 500, 440);
+        mediaFilePanel.setBounds(0, 0, 550, 440);
+        preferencesPanel.setBounds(0, 0, 500, 440);
+        loginPanel.setBounds(0, 0, 500, 440);
+
+        getContentPane().add(downloadpanel);
+        getContentPane().add(mediaFilePanel);
+        getContentPane().add(preferencesPanel);
+        getContentPane().add(loginPanel);
+        setLayout(null);
+        setSize(550, 440);
+        setLocationRelativeTo(null);
+        setResizable(false);
+        
+        //Cargar sesió 
+        String savedToken = leerSesion();
+        if (!savedToken.isEmpty()) {
+            this.jwt = savedToken;
+            try {
+                // intenta obtenir dades del usuari amb es token
+                diMediaPolling.setToken(jwt);
+                diMediaPolling.obtenirSessio();
+                diMediaPolling.setRunning(true); // Comprovar arxius servidor
+                //mostrar paneles
+                loginCorrecto();
+            } catch (Exception ex) {
+                // token inválido o expirado
+                this.jwt = "";
+                borrarSesion();
+                mostrarLogin();
+            }
+        } else {
+            mostrarLogin();
+        }
+    }
+
+    /**
+     * Guarda el token de sessió dins un fitxer.
+     * 
+     * @param token token JWT a guardar
+     */
+    public void guardarSesion(String token) {
+        try {
+            //Crei carpeta si es necesari
+            sessionFile.getParentFile().mkdirs();
+            FileWriter fw = new FileWriter(sessionFile);
+            fw.write(token);
+            fw.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    /**
+     * Llegeix el token de sessió des del fitxer.
+     * 
+     * @return el token guardat o cadena buida si no existeix
+     */
+    public String leerSesion() {
+        try {
+            if (!sessionFile.exists()) return "";
+            return new String(Files.readAllBytes(sessionFile.toPath())).trim();
+        } catch (Exception e) {
+            return "";
+        }
+    }
+    
+    /**
+     * Esborra el fitxer de sessió si existeix.
+     */
+    public void borrarSesion() {
+        if (sessionFile.exists()) sessionFile.delete();
+    }
+    
+    /**
+     * Activa o desactiva les opcions del menú.
+     * 
+     * @param enabled true per activar, false per desactivar
+     */
+    private void setMenusEnabled(boolean enabled) {
+        jMenuItemDownload.setEnabled(enabled);
+        jMenuItemServidor.setEnabled(enabled);
+        jMenuItemPreferences.setEnabled(enabled);
+        jMenuItemLogout.setEnabled(enabled);
+        // Sempre disponibles
+        jMenuItemExit.setEnabled(true);
+        jMenuItemAbout.setEnabled(true);
+    }
+    /**
+     * Mostra el panel de login i desactiva els menús.
+     */
+    public void mostrarLogin() {
+        downloadpanel.setVisible(false);
+        mediaFilePanel.setVisible(false);
+        preferencesPanel.setVisible(false);
+        loginPanel.setVisible(true);
+        //Deshabilitam menus
+        setMenusEnabled(false);
+
+    }
+    /**
+     * Executa accions després d'un login correcte.
+     * Mostra el panel principal i activa els menús.
+     */
+    public void loginCorrecto() {
+        loginPanel.setVisible(false);
+        downloadpanel.setVisible(true);
+        mediaFilePanel.setVisible(false);
+        preferencesPanel.setVisible(false);
+        jMenuItemPreferences.setEnabled(true);
+        //Habilitam menus
+        setMenusEnabled(true);
+
+    }
+    /**
+     * Mostra el panel de descàrregues.
+     */
+    public void mostrarDownloadPanel() {
+        preferencesPanel.setVisible(false);
+        downloadpanel.setVisible(true);
+    }
+    /**
+     * Retorna el panel de preferències.
+     * 
+     * @return PreferencesPanel
+     */
+    public PreferencesPanel getPreferencesPanel() {
+        return preferencesPanel;
+    }
+    /**
+     * Retorna el panel de fitxers multimèdia.
+     * 
+     * @return MediaFilePanel
+     */
+    public MediaFilePanel getMediaFilePanel() {
+        return mediaFilePanel;
+    }
+    /**
+     * Retorna el component de polling del servidor.
+     * 
+     * @return DIMediaNetPollingComponent
+     */
+    public DIMediaNetPollingComponent getDiMediaPolling() {
+        return diMediaPolling;
+    }
+
+    /**
+     * This method is called from within the constructor to initialize the form.
+     * WARNING: Do NOT modify this code. The content of this method is always
+     * regenerated by the Form Editor.
+     */
+    @SuppressWarnings("unchecked")
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+    private void initComponents() {
+
+        jDialogAbout = new javax.swing.JDialog();
+        jLabelNombre = new javax.swing.JLabel();
+        diMediaPolling = new anglada.dimedianetpollingcomponent.DIMediaNetPollingComponent();
+        jMenuBar1 = new javax.swing.JMenuBar();
+        jMenuFile = new javax.swing.JMenu();
+        jMenuItemDownload = new javax.swing.JMenuItem();
+        jMenuItemLogout = new javax.swing.JMenuItem();
+        jMenuItemExit = new javax.swing.JMenuItem();
+        jMenuServidor = new javax.swing.JMenu();
+        jMenuItemServidor = new javax.swing.JMenuItem();
+        jMenuEdit = new javax.swing.JMenu();
+        jMenuItemPreferences = new javax.swing.JMenuItem();
+        JMenuHelp = new javax.swing.JMenu();
+        jMenuItemAbout = new javax.swing.JMenuItem();
+
+        jDialogAbout.setTitle("Acerca de");
+        jDialogAbout.setBounds(new java.awt.Rectangle(0, 0, 400, 325));
+        jDialogAbout.getContentPane().setLayout(null);
+
+        jLabelNombre.setText("<html>   <div style=\"text-align: center; font-family: Arial, sans-serif;\">     <img src=\"file:src/main/resources/images/logo.png\" width=\"100\" height=\"100\"><br><br>     <span style=\"font-size: 16pt; font-weight: bold;\">Andreu Anglada</span><br>     <span style=\"font-size: 12pt;\">Curso de Desarrollo de Interfaces - Grado Superior DAM</span><br><br>     <span style=\"font-size: 12pt; font-weight: bold;\">Recursos utilizados:</span><br>     <span style=\"font-size: 12pt;\">       YT-DLP, FFmpeg, Imágenes, NetBeans IDE 27, ChatGPT, YouTube canal SPDVI     </span><br><br>     <span style=\"font-size: 10pt; font-style: italic;\">       Gracias a todos los recursos mencionados por su disponibilidad.     </span>   </div> </html>");
+        jDialogAbout.getContentPane().add(jLabelNombre);
+        jLabelNombre.setBounds(70, 0, 250, 260);
+
+        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setIconImages(null);
+        setResizable(false);
+        getContentPane().setLayout(null);
+        getContentPane().add(diMediaPolling);
+        diMediaPolling.setBounds(10, 10, 130, 90);
+
+        jMenuFile.setText("Archivo");
+
+        jMenuItemDownload.setText("Descargar");
+        jMenuItemDownload.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItemDownloadActionPerformed(evt);
+            }
+        });
+        jMenuFile.add(jMenuItemDownload);
+
+        jMenuItemLogout.setText("Cerrar Sesión");
+        jMenuItemLogout.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItemLogoutActionPerformed(evt);
+            }
+        });
+        jMenuFile.add(jMenuItemLogout);
+
+        jMenuItemExit.setText("Salir");
+        jMenuItemExit.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItemExitActionPerformed(evt);
+            }
+        });
+        jMenuFile.add(jMenuItemExit);
+
+        jMenuBar1.add(jMenuFile);
+
+        jMenuServidor.setText("Medios");
+
+        jMenuItemServidor.setText("Biblioteca de Medios");
+        jMenuItemServidor.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItemServidorActionPerformed(evt);
+            }
+        });
+        jMenuServidor.add(jMenuItemServidor);
+
+        jMenuBar1.add(jMenuServidor);
+
+        jMenuEdit.setText("Editar");
+
+        jMenuItemPreferences.setText("Configuración");
+        jMenuItemPreferences.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItemPreferencesActionPerformed(evt);
+            }
+        });
+        jMenuEdit.add(jMenuItemPreferences);
+
+        jMenuBar1.add(jMenuEdit);
+
+        JMenuHelp.setText("Ayuda");
+
+        jMenuItemAbout.setText("Acerca de...");
+        jMenuItemAbout.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItemAboutActionPerformed(evt);
+            }
+        });
+        JMenuHelp.add(jMenuItemAbout);
+
+        jMenuBar1.add(JMenuHelp);
+
+        setJMenuBar(jMenuBar1);
+
+        pack();
+    }// </editor-fold>//GEN-END:initComponents
+    /**
+     * Tanca l'aplicació quan es selecciona "Salir" al menú.
+     * 
+     * @param evt Event d'acció del JMenuItem
+     */
+    private void jMenuItemExitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemExitActionPerformed
+        System.exit(0);
+    }//GEN-LAST:event_jMenuItemExitActionPerformed
+    /**
+     * Mostra el panel de configuració quan es selecciona "Configuración".
+     * 
+     * @param evt Event d'acció del JMenuItem
+     */
+    private void jMenuItemPreferencesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemPreferencesActionPerformed
+        downloadpanel.setVisible(false);
+        preferencesPanel.setVisible(true);
+        mediaFilePanel.setVisible(false);
+    }//GEN-LAST:event_jMenuItemPreferencesActionPerformed
+    /**
+     * Mostra el diàleg "Acerca de..." amb informació de l'autor i recursos.
+     * 
+     * @param evt Event d'acció del JMenuItem
+     */
+    private void jMenuItemAboutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemAboutActionPerformed
+
+        jDialogAbout.setModal(true);
+        jDialogAbout.setLocationRelativeTo(this);
+        jDialogAbout.setVisible(true);
+    }//GEN-LAST:event_jMenuItemAboutActionPerformed
+    /**
+     * Mostra el panel de biblioteca de mitjans quan es selecciona "Biblioteca de Medios".
+     * 
+     * @param evt Event d'acció del JMenuItem
+     */
+    private void jMenuItemServidorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemServidorActionPerformed
+        downloadpanel.setVisible(false);
+        preferencesPanel.setVisible(false);
+        mediaFilePanel.setVisible(true);
+    }//GEN-LAST:event_jMenuItemServidorActionPerformed
+    /**
+     * Mostra el panel de descàrregues quan es selecciona "Descargar".
+     * 
+     * @param evt Event d'acció del JMenuItem
+     */
+    private void jMenuItemDownloadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemDownloadActionPerformed
+        downloadpanel.setVisible(true);
+        preferencesPanel.setVisible(false);
+        mediaFilePanel.setVisible(false);
+    }//GEN-LAST:event_jMenuItemDownloadActionPerformed
+    /**
+     * Tanca la sessió actual, esborra el token i mostra el login.
+     * 
+     * @param evt Event d'acció del JMenuItem
+     */
+    private void jMenuItemLogoutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemLogoutActionPerformed
+        borrarSesion();   // borra archivo
+        this.jwt = "";    // borra token en memoria
+        loginPanel.limpiar();
+        preferencesPanel.reiniciar(); // neteja configuració
+        mostrarLogin();
+    }//GEN-LAST:event_jMenuItemLogoutActionPerformed
+
+    /**
+     * Punt d'entrada de l'aplicació.
+     * 
+     * @param args arguments de línia de comandes (no utilitzats)
+     */
+    public static void main(String args[]) {
+        
+
+        /* Create and display the form */
+        java.awt.EventQueue.invokeLater(() -> new SenseBrutor().setVisible(true));
+    }
+
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JMenu JMenuHelp;
+    private anglada.dimedianetpollingcomponent.DIMediaNetPollingComponent diMediaPolling;
+    private javax.swing.JDialog jDialogAbout;
+    private javax.swing.JLabel jLabelNombre;
+    private javax.swing.JMenuBar jMenuBar1;
+    private javax.swing.JMenu jMenuEdit;
+    private javax.swing.JMenu jMenuFile;
+    private javax.swing.JMenuItem jMenuItemAbout;
+    private javax.swing.JMenuItem jMenuItemDownload;
+    private javax.swing.JMenuItem jMenuItemExit;
+    private javax.swing.JMenuItem jMenuItemLogout;
+    private javax.swing.JMenuItem jMenuItemPreferences;
+    private javax.swing.JMenuItem jMenuItemServidor;
+    private javax.swing.JMenu jMenuServidor;
+    // End of variables declaration//GEN-END:variables
+}

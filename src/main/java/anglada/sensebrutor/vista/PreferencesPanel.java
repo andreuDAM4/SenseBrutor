@@ -1,0 +1,294 @@
+package anglada.sensebrutor.vista;
+
+import anglada.sensebrutor.SenseBrutor;
+import java.awt.Color;
+import java.io.File;
+import javax.swing.JFileChooser;
+
+/**
+ * Panell de configuració de l'aplicació.
+ * Permet definir la carpeta de descàrrega, la ruta de yt-dlp,
+ * la velocitat màxima i si es vol crear un arxiu .m3u.
+ * 
+ * @author Andreu
+ * @version 1.0
+ */
+public class PreferencesPanel extends javax.swing.JPanel {
+
+    
+    private final SenseBrutor mainFrame;
+    /**
+     * Constructor del panell de preferències.
+     * Inicialitza els components i estableix les rutes per defecte.
+     *
+     * @param mainFrame finestra principal de l'aplicació
+     */
+    public PreferencesPanel(SenseBrutor mainFrame) {
+        initComponents();
+        this.mainFrame = mainFrame;
+        inicializarRutasPorDefecto();
+    }
+    
+    /**
+     * 
+     * Obté la ruta de descàrrega configurada.
+     *
+     * @return ruta de descàrrega
+     */
+    public String getDownloadPath() {
+        return jTextFieldDownloadPath.getText().trim();
+    }
+    /**
+     * Obté la ruta de l'executable yt-dlp.
+     *
+     * @return ruta de yt-dlp
+     */
+    public String getYTDLPPath() {
+        return jTextFieldPathYTDLP.getText().trim();
+    }
+    /**
+     * Obté la velocitat màxima de descàrrega.
+     *
+     * @return velocitat en KB/s (0 = il·limitat)
+     */
+    public int getMaxVelocity() {
+        return (Integer) jSpinnerVelocity.getValue();
+    }
+    /**
+     * Indica si s'ha de crear un arxiu M3U.
+     *
+     * @return true si està activat, false si no
+     */
+    public boolean isCreateM3U() {
+        return jCheckBoxM3u.isSelected();
+    }
+    
+     /**
+     * Obrir el selector per elegir la carpeta de descàrrega.
+     */
+    public void elegirCarpetaDescarga() {
+        jButtonDownloadPathActionPerformed(null);
+    }
+    
+    /**
+     * Obrir el selector per elegir el fitxer yt-dlp.
+     */
+    public void elegirArchivoYTDLP() {
+        jButtonPathYTDLPActionPerformed(null);
+    }
+    /**
+     * Reinicia tots els camps del PreferencesPanel a valors per defecte.
+     */
+   public void reiniciar() {
+       jTextFieldDownloadPath.setText("");
+       jTextFieldPathYTDLP.setText("");
+       jSpinnerVelocity.setValue(0);
+       jCheckBoxM3u.setSelected(false);
+   }
+   /**
+    * 
+    * Inicialitza les rutes per defecte si els camps estan buits.
+    * Defineix la carpeta Downloads i la possible ruta de yt-dlp.
+    */
+   private void inicializarRutasPorDefecto() {
+        // Carpeta por defecto (Downloads)
+        String defaultDownload = System.getProperty("user.home") + File.separator + "Downloads";
+
+        // Ruta por defecto yt-dlp
+        String defaultYtdlp = System.getProperty("user.home") + File.separator + "yt-dlp" + File.separator + "yt-dlp.exe";
+
+        // Solo si están vacíos (para no sobrescribir)
+        if (jTextFieldDownloadPath.getText().isEmpty()) {
+            jTextFieldDownloadPath.setText(defaultDownload);
+        }
+
+        File ytdlpFile = new File(defaultYtdlp);
+
+        if (jTextFieldPathYTDLP.getText().isEmpty()) {
+            if (ytdlpFile.exists() && ytdlpFile.isFile()) {
+                jTextFieldPathYTDLP.setText(defaultYtdlp);
+            } else {
+                jTextFieldPathYTDLP.setText(""); // no engañar al usuario
+            }
+        }
+
+        validarRutas();
+   }
+   /**
+    * 
+    * Valida les rutes introduïdes i mostra feedback visual.
+    * Marca en vermell si la ruta no existeix o és incorrecta.
+    */
+   private void validarRutas() {
+        String pathDescarga = jTextFieldDownloadPath.getText().trim();
+        String pathYtdlp = jTextFieldPathYTDLP.getText().trim();
+
+        // Validación Carpeta de Descarga: Rojo si está vacío O si no existe
+        if (!pathDescarga.isEmpty()) {
+            File f = new File(pathDescarga);
+            if (f.exists() && f.isDirectory()) {
+                jTextFieldDownloadPath.setBackground(Color.WHITE);
+            } else {
+                jTextFieldDownloadPath.setBackground(new Color(255, 200, 200));
+            }
+        } else {
+            // CAMBIO: Si está vacío, también marcamos en rojo (o un amarillo de advertencia)
+            jTextFieldDownloadPath.setBackground(new Color(255, 200, 200));
+        }
+
+        // Validación YT-DLP: Rojo si está vacío O si no existe
+        if (!pathYtdlp.isEmpty()) {
+            File f = new File(pathYtdlp);
+            if (f.exists() && f.isFile()) {
+                jTextFieldPathYTDLP.setBackground(Color.WHITE);
+            } else {
+                jTextFieldPathYTDLP.setBackground(new Color(255, 200, 200));
+            }
+        } else {
+            // CAMBIO: Si está vacío, también marcamos en rojo
+            jTextFieldPathYTDLP.setBackground(new Color(255, 200, 200));
+        }
+        }
+    /**
+     * This method is called from within the constructor to initialize the form.
+     * WARNING: Do NOT modify this code. The content of this method is always
+     * regenerated by the Form Editor.
+     */
+    @SuppressWarnings("unchecked")
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+    private void initComponents() {
+
+        jFileChooserGeneral = new javax.swing.JFileChooser();
+        jLabelDownloadPathFile = new javax.swing.JLabel();
+        jButtonDownloadPath = new javax.swing.JButton();
+        jTextFieldDownloadPath = new javax.swing.JTextField();
+        jCheckBoxM3u = new javax.swing.JCheckBox();
+        jLabelVelocity = new javax.swing.JLabel();
+        jSpinnerVelocity = new javax.swing.JSpinner();
+        jLabelPathYTDLP = new javax.swing.JLabel();
+        jButtonPathYTDLP = new javax.swing.JButton();
+        jTextFieldPathYTDLP = new javax.swing.JTextField();
+        jLabelTitlePreferences = new javax.swing.JLabel();
+
+        jFileChooserGeneral.setApproveButtonText("Seleccionar");
+        jFileChooserGeneral.setDialogTitle("Selecciona una carpeta para guardar");
+        jFileChooserGeneral.setFileSelectionMode(javax.swing.JFileChooser.DIRECTORIES_ONLY);
+
+        setName("PreferencesPanel"); // NOI18N
+        setLayout(null);
+
+        jLabelDownloadPathFile.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        jLabelDownloadPathFile.setText("Guardar archivo en");
+        add(jLabelDownloadPathFile);
+        jLabelDownloadPathFile.setBounds(40, 80, 190, 16);
+
+        jButtonDownloadPath.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        jButtonDownloadPath.setText("Seleccionar Carpeta");
+        jButtonDownloadPath.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonDownloadPathActionPerformed(evt);
+            }
+        });
+        add(jButtonDownloadPath);
+        jButtonDownloadPath.setBounds(40, 120, 160, 23);
+
+        jTextFieldDownloadPath.setToolTipText("Ruta absoluta donde se guardarán los vídeos y audios.");
+        jTextFieldDownloadPath.setEnabled(false);
+        add(jTextFieldDownloadPath);
+        jTextFieldDownloadPath.setBounds(210, 120, 281, 22);
+
+        jCheckBoxM3u.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        jCheckBoxM3u.setText("Crear archivo .m3u");
+        jCheckBoxM3u.setToolTipText("Si se marca, cada descarga se añadirá automáticamente a una lista de reproducción .m3u");
+        add(jCheckBoxM3u);
+        jCheckBoxM3u.setBounds(40, 160, 170, 20);
+
+        jLabelVelocity.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        jLabelVelocity.setText("Velocidad máxima (KB/s)");
+        add(jLabelVelocity);
+        jLabelVelocity.setBounds(40, 210, 150, 16);
+
+        jSpinnerVelocity.setToolTipText("Establece 0 para velocidad ilimitada.");
+        add(jSpinnerVelocity);
+        jSpinnerVelocity.setBounds(220, 210, 64, 22);
+
+        jLabelPathYTDLP.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        jLabelPathYTDLP.setText("Ruta YT-DLP");
+        add(jLabelPathYTDLP);
+        jLabelPathYTDLP.setBounds(40, 260, 130, 16);
+
+        jButtonPathYTDLP.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        jButtonPathYTDLP.setText("Seleccionar archivo");
+        jButtonPathYTDLP.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonPathYTDLPActionPerformed(evt);
+            }
+        });
+        add(jButtonPathYTDLP);
+        jButtonPathYTDLP.setBounds(40, 290, 160, 23);
+
+        jTextFieldPathYTDLP.setEnabled(false);
+        add(jTextFieldPathYTDLP);
+        jTextFieldPathYTDLP.setBounds(210, 290, 280, 22);
+
+        jLabelTitlePreferences.setFont(new java.awt.Font("Segoe UI", 1, 32)); // NOI18N
+        jLabelTitlePreferences.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/engranajes-mecanicos1.png"))); // NOI18N
+        jLabelTitlePreferences.setText("Configuración");
+        add(jLabelTitlePreferences);
+        jLabelTitlePreferences.setBounds(150, 20, 320, 50);
+    }// </editor-fold>//GEN-END:initComponents
+    
+    /**
+     * Gestor del botó per seleccionar la carpeta de descàrrega.
+     * Obri un JFileChooser i actualitza la ruta seleccionada.
+     *
+     * @param evt esdeveniment del botó
+     */
+    private void jButtonDownloadPathActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDownloadPathActionPerformed
+        jFileChooserGeneral.setDialogTitle("Selecciona la carpeta de descarga");
+        jFileChooserGeneral.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+
+        if (jFileChooserGeneral.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+            jTextFieldDownloadPath.setText(jFileChooserGeneral.getSelectedFile().getAbsolutePath());
+            validarRutas(); // Feedback visual
+
+            // Notificar al frame principal para actualizar la biblioteca
+            if (mainFrame != null && mainFrame.getMediaFilePanel() != null) {
+                mainFrame.getMediaFilePanel().reloadIfConfigured();
+            }
+        }
+    }//GEN-LAST:event_jButtonDownloadPathActionPerformed
+    
+    /**
+     * Gestor del botó per seleccionar el fitxer yt-dlp.
+     * Obri un JFileChooser i actualitza la ruta seleccionada.
+     *
+     * @param evt esdeveniment del botó
+     */
+    private void jButtonPathYTDLPActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonPathYTDLPActionPerformed
+        jFileChooserGeneral.setDialogTitle("Selecciona el archivo de yt-dlp");
+        jFileChooserGeneral.setFileSelectionMode(JFileChooser.FILES_ONLY);
+
+        int result = jFileChooserGeneral.showOpenDialog(this);
+        if (result == JFileChooser.APPROVE_OPTION) {
+            File archivo = jFileChooserGeneral.getSelectedFile();
+            jTextFieldPathYTDLP.setText(archivo.getAbsolutePath());
+            validarRutas(); // <--- AÑADE ESTO AQUÍ
+        }
+    }//GEN-LAST:event_jButtonPathYTDLPActionPerformed
+
+
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton jButtonDownloadPath;
+    private javax.swing.JButton jButtonPathYTDLP;
+    private javax.swing.JCheckBox jCheckBoxM3u;
+    private javax.swing.JFileChooser jFileChooserGeneral;
+    private javax.swing.JLabel jLabelDownloadPathFile;
+    private javax.swing.JLabel jLabelPathYTDLP;
+    private javax.swing.JLabel jLabelTitlePreferences;
+    private javax.swing.JLabel jLabelVelocity;
+    private javax.swing.JSpinner jSpinnerVelocity;
+    private javax.swing.JTextField jTextFieldDownloadPath;
+    private javax.swing.JTextField jTextFieldPathYTDLP;
+    // End of variables declaration//GEN-END:variables
+}

@@ -1,0 +1,1 @@
+packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"l":"anglada.sensebrutor"},{"l":"anglada.sensebrutor.model"},{"l":"anglada.sensebrutor.vista"}];updateSearchResults();
